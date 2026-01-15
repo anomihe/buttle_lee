@@ -1,0 +1,11 @@
+class: UserProfile
+table: user_profile
+fields:
+  fullName: String
+  email: String
+  profileImageUrl: String?
+  userInfoId: int
+indexes:
+  userInfoId_idx:
+    fields: userInfoId
+    unique: true

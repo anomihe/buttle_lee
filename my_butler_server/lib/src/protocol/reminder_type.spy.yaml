@@ -1,0 +1,6 @@
+enum: ReminderType
+values:
+  - daily
+  - weekly
+  - annual
+  - once

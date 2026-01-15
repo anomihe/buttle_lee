@@ -1,0 +1,5 @@
+enum: Priority
+values:
+  - low
+  - medium
+  - high

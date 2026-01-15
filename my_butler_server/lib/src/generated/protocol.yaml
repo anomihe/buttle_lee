@@ -1,0 +1,17 @@
+ai:
+  - processCommand:
+auth:
+  - registerWithProfile:
+  - createProfile:
+  - getUserProfile:
+  - updateProfileImage:
+reminder:
+  - createReminder:
+  - getUserReminders:
+  - getCompletedReminders:
+  - getUpcomingReminders:
+  - updateReminder:
+  - deleteReminder:
+  - snoozeReminder:
+greeting:
+  - hello:

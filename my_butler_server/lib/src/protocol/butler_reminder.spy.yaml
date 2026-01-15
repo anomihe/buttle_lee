@@ -1,0 +1,10 @@
+class: ButlerReminder
+table: butler_reminder
+fields:
+  description: String
+  triggerTime: DateTime
+  reminderType: ReminderType
+  priority: Priority, default=medium
+  snoozedUntil: DateTime?
+  userId: int
+  isActive: bool, default=true
