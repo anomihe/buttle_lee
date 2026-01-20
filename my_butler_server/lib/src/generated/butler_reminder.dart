@@ -25,6 +25,7 @@ abstract class ButlerReminder
     this.snoozedUntil,
     required this.userId,
     bool? isActive,
+    this.assignedToUserId,
   }) : priority = priority ?? _i2.Priority.medium,
        isActive = isActive ?? true;
 
@@ -37,6 +38,7 @@ abstract class ButlerReminder
     DateTime? snoozedUntil,
     required int userId,
     bool? isActive,
+    int? assignedToUserId,
   }) = _ButlerReminderImpl;
 
   factory ButlerReminder.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -59,6 +61,7 @@ abstract class ButlerReminder
             ),
       userId: jsonSerialization['userId'] as int,
       isActive: jsonSerialization['isActive'] as bool,
+      assignedToUserId: jsonSerialization['assignedToUserId'] as int?,
     );
   }
 
@@ -83,6 +86,8 @@ abstract class ButlerReminder
 
   bool isActive;
 
+  int? assignedToUserId;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -98,6 +103,7 @@ abstract class ButlerReminder
     DateTime? snoozedUntil,
     int? userId,
     bool? isActive,
+    int? assignedToUserId,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -111,6 +117,7 @@ abstract class ButlerReminder
       if (snoozedUntil != null) 'snoozedUntil': snoozedUntil?.toJson(),
       'userId': userId,
       'isActive': isActive,
+      if (assignedToUserId != null) 'assignedToUserId': assignedToUserId,
     };
   }
 
@@ -126,6 +133,7 @@ abstract class ButlerReminder
       if (snoozedUntil != null) 'snoozedUntil': snoozedUntil?.toJson(),
       'userId': userId,
       'isActive': isActive,
+      if (assignedToUserId != null) 'assignedToUserId': assignedToUserId,
     };
   }
 
@@ -171,6 +179,7 @@ class _ButlerReminderImpl extends ButlerReminder {
     DateTime? snoozedUntil,
     required int userId,
     bool? isActive,
+    int? assignedToUserId,
   }) : super._(
          id: id,
          description: description,
@@ -180,6 +189,7 @@ class _ButlerReminderImpl extends ButlerReminder {
          snoozedUntil: snoozedUntil,
          userId: userId,
          isActive: isActive,
+         assignedToUserId: assignedToUserId,
        );
 
   /// Returns a shallow copy of this [ButlerReminder]
@@ -195,6 +205,7 @@ class _ButlerReminderImpl extends ButlerReminder {
     Object? snoozedUntil = _Undefined,
     int? userId,
     bool? isActive,
+    Object? assignedToUserId = _Undefined,
   }) {
     return ButlerReminder(
       id: id is int? ? id : this.id,
@@ -207,6 +218,9 @@ class _ButlerReminderImpl extends ButlerReminder {
           : this.snoozedUntil,
       userId: userId ?? this.userId,
       isActive: isActive ?? this.isActive,
+      assignedToUserId: assignedToUserId is int?
+          ? assignedToUserId
+          : this.assignedToUserId,
     );
   }
 }
@@ -253,6 +267,11 @@ class ButlerReminderUpdateTable extends _i1.UpdateTable<ButlerReminderTable> {
     table.isActive,
     value,
   );
+
+  _i1.ColumnValue<int, int> assignedToUserId(int? value) => _i1.ColumnValue(
+    table.assignedToUserId,
+    value,
+  );
 }
 
 class ButlerReminderTable extends _i1.Table<int?> {
@@ -291,6 +310,10 @@ class ButlerReminderTable extends _i1.Table<int?> {
       this,
       hasDefault: true,
     );
+    assignedToUserId = _i1.ColumnInt(
+      'assignedToUserId',
+      this,
+    );
   }
 
   late final ButlerReminderUpdateTable updateTable;
@@ -309,6 +332,8 @@ class ButlerReminderTable extends _i1.Table<int?> {
 
   late final _i1.ColumnBool isActive;
 
+  late final _i1.ColumnInt assignedToUserId;
+
   @override
   List<_i1.Column> get columns => [
     id,
@@ -319,6 +344,7 @@ class ButlerReminderTable extends _i1.Table<int?> {
     snoozedUntil,
     userId,
     isActive,
+    assignedToUserId,
   ];
 }
 

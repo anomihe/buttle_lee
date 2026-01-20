@@ -8,3 +8,4 @@ fields:
   snoozedUntil: DateTime?
   userId: int
   isActive: bool, default=true
+  assignedToUserId: int?

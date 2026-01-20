@@ -5,6 +5,13 @@ fields:
   email: String
   profileImageUrl: String?
   userInfoId: int
+  xp: int, default=0
+  level: int, default=1
+  hydrationGoal: int, default=8
+  hydrationCount: int, default=0
+  hydrationDate: String?
+  hydrationReminder: bool, default=false
+  hydrationHistory: String?
 indexes:
   userInfoId_idx:
     fields: userInfoId

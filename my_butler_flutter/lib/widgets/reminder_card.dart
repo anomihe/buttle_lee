@@ -9,12 +9,14 @@ class ReminderCard extends StatelessWidget {
   final ButlerReminder reminder;
   final VoidCallback onDelete;
   final VoidCallback? onEdit;
+  final VoidCallback? onComplete;
 
   const ReminderCard({
     super.key,
     required this.reminder,
     required this.onDelete,
     this.onEdit,
+    this.onComplete,
   });
 
   String _formatDateTime(DateTime dateTime) {
@@ -329,6 +331,30 @@ class ReminderCard extends StatelessWidget {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Complete button
+                if (onComplete != null) ...[
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: onComplete,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(Icons.check_rounded,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.primary),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 // Edit button
                 Material(
                   color: Colors.transparent,

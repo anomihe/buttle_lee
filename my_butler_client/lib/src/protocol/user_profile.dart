@@ -19,7 +19,18 @@ abstract class UserProfile implements _i1.SerializableModel {
     required this.email,
     this.profileImageUrl,
     required this.userInfoId,
-  });
+    int? xp,
+    int? level,
+    int? hydrationGoal,
+    int? hydrationCount,
+    this.hydrationDate,
+    bool? hydrationReminder,
+    this.hydrationHistory,
+  }) : xp = xp ?? 0,
+       level = level ?? 1,
+       hydrationGoal = hydrationGoal ?? 8,
+       hydrationCount = hydrationCount ?? 0,
+       hydrationReminder = hydrationReminder ?? false;
 
   factory UserProfile({
     int? id,
@@ -27,6 +38,13 @@ abstract class UserProfile implements _i1.SerializableModel {
     required String email,
     String? profileImageUrl,
     required int userInfoId,
+    int? xp,
+    int? level,
+    int? hydrationGoal,
+    int? hydrationCount,
+    String? hydrationDate,
+    bool? hydrationReminder,
+    String? hydrationHistory,
   }) = _UserProfileImpl;
 
   factory UserProfile.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -36,6 +54,13 @@ abstract class UserProfile implements _i1.SerializableModel {
       email: jsonSerialization['email'] as String,
       profileImageUrl: jsonSerialization['profileImageUrl'] as String?,
       userInfoId: jsonSerialization['userInfoId'] as int,
+      xp: jsonSerialization['xp'] as int,
+      level: jsonSerialization['level'] as int,
+      hydrationGoal: jsonSerialization['hydrationGoal'] as int,
+      hydrationCount: jsonSerialization['hydrationCount'] as int,
+      hydrationDate: jsonSerialization['hydrationDate'] as String?,
+      hydrationReminder: jsonSerialization['hydrationReminder'] as bool,
+      hydrationHistory: jsonSerialization['hydrationHistory'] as String?,
     );
   }
 
@@ -52,6 +77,20 @@ abstract class UserProfile implements _i1.SerializableModel {
 
   int userInfoId;
 
+  int xp;
+
+  int level;
+
+  int hydrationGoal;
+
+  int hydrationCount;
+
+  String? hydrationDate;
+
+  bool hydrationReminder;
+
+  String? hydrationHistory;
+
   /// Returns a shallow copy of this [UserProfile]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -61,6 +100,13 @@ abstract class UserProfile implements _i1.SerializableModel {
     String? email,
     String? profileImageUrl,
     int? userInfoId,
+    int? xp,
+    int? level,
+    int? hydrationGoal,
+    int? hydrationCount,
+    String? hydrationDate,
+    bool? hydrationReminder,
+    String? hydrationHistory,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -71,6 +117,13 @@ abstract class UserProfile implements _i1.SerializableModel {
       'email': email,
       if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
       'userInfoId': userInfoId,
+      'xp': xp,
+      'level': level,
+      'hydrationGoal': hydrationGoal,
+      'hydrationCount': hydrationCount,
+      if (hydrationDate != null) 'hydrationDate': hydrationDate,
+      'hydrationReminder': hydrationReminder,
+      if (hydrationHistory != null) 'hydrationHistory': hydrationHistory,
     };
   }
 
@@ -89,12 +142,26 @@ class _UserProfileImpl extends UserProfile {
     required String email,
     String? profileImageUrl,
     required int userInfoId,
+    int? xp,
+    int? level,
+    int? hydrationGoal,
+    int? hydrationCount,
+    String? hydrationDate,
+    bool? hydrationReminder,
+    String? hydrationHistory,
   }) : super._(
          id: id,
          fullName: fullName,
          email: email,
          profileImageUrl: profileImageUrl,
          userInfoId: userInfoId,
+         xp: xp,
+         level: level,
+         hydrationGoal: hydrationGoal,
+         hydrationCount: hydrationCount,
+         hydrationDate: hydrationDate,
+         hydrationReminder: hydrationReminder,
+         hydrationHistory: hydrationHistory,
        );
 
   /// Returns a shallow copy of this [UserProfile]
@@ -107,6 +174,13 @@ class _UserProfileImpl extends UserProfile {
     String? email,
     Object? profileImageUrl = _Undefined,
     int? userInfoId,
+    int? xp,
+    int? level,
+    int? hydrationGoal,
+    int? hydrationCount,
+    Object? hydrationDate = _Undefined,
+    bool? hydrationReminder,
+    Object? hydrationHistory = _Undefined,
   }) {
     return UserProfile(
       id: id is int? ? id : this.id,
@@ -116,6 +190,17 @@ class _UserProfileImpl extends UserProfile {
           ? profileImageUrl
           : this.profileImageUrl,
       userInfoId: userInfoId ?? this.userInfoId,
+      xp: xp ?? this.xp,
+      level: level ?? this.level,
+      hydrationGoal: hydrationGoal ?? this.hydrationGoal,
+      hydrationCount: hydrationCount ?? this.hydrationCount,
+      hydrationDate: hydrationDate is String?
+          ? hydrationDate
+          : this.hydrationDate,
+      hydrationReminder: hydrationReminder ?? this.hydrationReminder,
+      hydrationHistory: hydrationHistory is String?
+          ? hydrationHistory
+          : this.hydrationHistory,
     );
   }
 }

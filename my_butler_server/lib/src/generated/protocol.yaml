@@ -1,10 +1,23 @@
 ai:
   - processCommand:
+analytics:
+  - getWeeklyProductivity:
 auth:
   - registerWithProfile:
   - createProfile:
   - getUserProfile:
   - updateProfileImage:
+book:
+  - addBook:
+  - getBooks:
+  - finishBook:
+household:
+  - createHousehold:
+  - joinHousehold:
+  - getHouseholdMembers:
+  - getMyHouseholds:
+  - leaveHousehold:
+  - deleteHousehold:
 reminder:
   - createReminder:
   - getUserReminders:
@@ -13,5 +26,8 @@ reminder:
   - updateReminder:
   - deleteReminder:
   - snoozeReminder:
+userProfile:
+  - getProfile:
+  - updateHydration:
 greeting:
   - hello:

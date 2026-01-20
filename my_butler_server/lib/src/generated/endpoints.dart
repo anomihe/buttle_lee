@@ -12,16 +12,21 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
 import '../endpoints/ai_endpoint.dart' as _i2;
-import '../endpoints/auth_endpoint.dart' as _i3;
-import '../endpoints/reminder_endpoint.dart' as _i4;
-import '../greeting_endpoint.dart' as _i5;
-import 'package:my_butler_server/src/generated/reminder_type.dart' as _i6;
-import 'package:my_butler_server/src/generated/priority.dart' as _i7;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i8;
+import '../endpoints/analytics_endpoint.dart' as _i3;
+import '../endpoints/auth_endpoint.dart' as _i4;
+import '../endpoints/book_endpoint.dart' as _i5;
+import '../endpoints/household_endpoint.dart' as _i6;
+import '../endpoints/reminder_endpoint.dart' as _i7;
+import '../endpoints/user_profile_endpoint.dart' as _i8;
+import '../greeting_endpoint.dart' as _i9;
+import 'package:my_butler_server/src/generated/book.dart' as _i10;
+import 'package:my_butler_server/src/generated/reminder_type.dart' as _i11;
+import 'package:my_butler_server/src/generated/priority.dart' as _i12;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i13;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i9;
+    as _i14;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
-    as _i10;
+    as _i15;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -33,19 +38,43 @@ class Endpoints extends _i1.EndpointDispatch {
           'ai',
           null,
         ),
-      'auth': _i3.AuthEndpoint()
+      'analytics': _i3.AnalyticsEndpoint()
+        ..initialize(
+          server,
+          'analytics',
+          null,
+        ),
+      'auth': _i4.AuthEndpoint()
         ..initialize(
           server,
           'auth',
           null,
         ),
-      'reminder': _i4.ReminderEndpoint()
+      'book': _i5.BookEndpoint()
+        ..initialize(
+          server,
+          'book',
+          null,
+        ),
+      'household': _i6.HouseholdEndpoint()
+        ..initialize(
+          server,
+          'household',
+          null,
+        ),
+      'reminder': _i7.ReminderEndpoint()
         ..initialize(
           server,
           'reminder',
           null,
         ),
-      'greeting': _i5.GreetingEndpoint()
+      'userProfile': _i8.UserProfileEndpoint()
+        ..initialize(
+          server,
+          'userProfile',
+          null,
+        ),
+      'greeting': _i9.GreetingEndpoint()
         ..initialize(
           server,
           'greeting',
@@ -73,6 +102,22 @@ class Endpoints extends _i1.EndpointDispatch {
                 session,
                 params['command'],
               ),
+        ),
+      },
+    );
+    connectors['analytics'] = _i1.EndpointConnector(
+      name: 'analytics',
+      endpoint: endpoints['analytics']!,
+      methodConnectors: {
+        'getWeeklyProductivity': _i1.MethodConnector(
+          name: 'getWeeklyProductivity',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['analytics'] as _i3.AnalyticsEndpoint)
+                  .getWeeklyProductivity(session),
         ),
       },
     );
@@ -109,7 +154,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['auth'] as _i3.AuthEndpoint).registerWithProfile(
+                  (endpoints['auth'] as _i4.AuthEndpoint).registerWithProfile(
                     session,
                     params['email'],
                     params['password'],
@@ -140,7 +185,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['auth'] as _i3.AuthEndpoint).createProfile(
+              ) async => (endpoints['auth'] as _i4.AuthEndpoint).createProfile(
                 session,
                 params['fullName'],
                 params['email'],
@@ -154,7 +199,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['auth'] as _i3.AuthEndpoint).getUserProfile(
+              ) async => (endpoints['auth'] as _i4.AuthEndpoint).getUserProfile(
                 session,
               ),
         ),
@@ -172,9 +217,172 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['auth'] as _i3.AuthEndpoint).updateProfileImage(
+                  (endpoints['auth'] as _i4.AuthEndpoint).updateProfileImage(
                     session,
                     params['profileImageUrl'],
+                  ),
+        ),
+      },
+    );
+    connectors['book'] = _i1.EndpointConnector(
+      name: 'book',
+      endpoint: endpoints['book']!,
+      methodConnectors: {
+        'addBook': _i1.MethodConnector(
+          name: 'addBook',
+          params: {
+            'book': _i1.ParameterDescription(
+              name: 'book',
+              type: _i1.getType<_i10.Book>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['book'] as _i5.BookEndpoint).addBook(
+                session,
+                params['book'],
+              ),
+        ),
+        'getBooks': _i1.MethodConnector(
+          name: 'getBooks',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['book'] as _i5.BookEndpoint).getBooks(session),
+        ),
+        'finishBook': _i1.MethodConnector(
+          name: 'finishBook',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['book'] as _i5.BookEndpoint).finishBook(
+                session,
+                params['id'],
+              ),
+        ),
+      },
+    );
+    connectors['household'] = _i1.EndpointConnector(
+      name: 'household',
+      endpoint: endpoints['household']!,
+      methodConnectors: {
+        'createHousehold': _i1.MethodConnector(
+          name: 'createHousehold',
+          params: {
+            'name': _i1.ParameterDescription(
+              name: 'name',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .createHousehold(
+                    session,
+                    params['name'],
+                  ),
+        ),
+        'joinHousehold': _i1.MethodConnector(
+          name: 'joinHousehold',
+          params: {
+            'joinCode': _i1.ParameterDescription(
+              name: 'joinCode',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .joinHousehold(
+                    session,
+                    params['joinCode'],
+                  ),
+        ),
+        'getHouseholdMembers': _i1.MethodConnector(
+          name: 'getHouseholdMembers',
+          params: {
+            'householdId': _i1.ParameterDescription(
+              name: 'householdId',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .getHouseholdMembers(
+                    session,
+                    householdId: params['householdId'],
+                  ),
+        ),
+        'getMyHouseholds': _i1.MethodConnector(
+          name: 'getMyHouseholds',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .getMyHouseholds(session),
+        ),
+        'leaveHousehold': _i1.MethodConnector(
+          name: 'leaveHousehold',
+          params: {
+            'householdId': _i1.ParameterDescription(
+              name: 'householdId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .leaveHousehold(
+                    session,
+                    params['householdId'],
+                  ),
+        ),
+        'deleteHousehold': _i1.MethodConnector(
+          name: 'deleteHousehold',
+          params: {
+            'householdId': _i1.ParameterDescription(
+              name: 'householdId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .deleteHousehold(
+                    session,
+                    params['householdId'],
                   ),
         ),
       },
@@ -198,12 +406,12 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'reminderType': _i1.ParameterDescription(
               name: 'reminderType',
-              type: _i1.getType<_i6.ReminderType>(),
+              type: _i1.getType<_i11.ReminderType>(),
               nullable: false,
             ),
             'priority': _i1.ParameterDescription(
               name: 'priority',
-              type: _i1.getType<_i7.Priority>(),
+              type: _i1.getType<_i12.Priority>(),
               nullable: false,
             ),
           },
@@ -211,7 +419,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['reminder'] as _i4.ReminderEndpoint)
+              ) async => (endpoints['reminder'] as _i7.ReminderEndpoint)
                   .createReminder(
                     session,
                     params['description'],
@@ -227,7 +435,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['reminder'] as _i4.ReminderEndpoint)
+              ) async => (endpoints['reminder'] as _i7.ReminderEndpoint)
                   .getUserReminders(session),
         ),
         'getCompletedReminders': _i1.MethodConnector(
@@ -237,7 +445,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['reminder'] as _i4.ReminderEndpoint)
+              ) async => (endpoints['reminder'] as _i7.ReminderEndpoint)
                   .getCompletedReminders(session),
         ),
         'getUpcomingReminders': _i1.MethodConnector(
@@ -258,7 +466,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['reminder'] as _i4.ReminderEndpoint)
+              ) async => (endpoints['reminder'] as _i7.ReminderEndpoint)
                   .getUpcomingReminders(
                     session,
                     params['startTime'],
@@ -285,12 +493,12 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'reminderType': _i1.ParameterDescription(
               name: 'reminderType',
-              type: _i1.getType<_i6.ReminderType?>(),
+              type: _i1.getType<_i11.ReminderType?>(),
               nullable: true,
             ),
             'priority': _i1.ParameterDescription(
               name: 'priority',
-              type: _i1.getType<_i7.Priority?>(),
+              type: _i1.getType<_i12.Priority?>(),
               nullable: true,
             ),
           },
@@ -298,7 +506,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['reminder'] as _i4.ReminderEndpoint)
+              ) async => (endpoints['reminder'] as _i7.ReminderEndpoint)
                   .updateReminder(
                     session,
                     params['reminderId'],
@@ -321,7 +529,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['reminder'] as _i4.ReminderEndpoint)
+              ) async => (endpoints['reminder'] as _i7.ReminderEndpoint)
                   .deleteReminder(
                     session,
                     params['reminderId'],
@@ -345,11 +553,70 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['reminder'] as _i4.ReminderEndpoint)
+              ) async => (endpoints['reminder'] as _i7.ReminderEndpoint)
                   .snoozeReminder(
                     session,
                     params['reminderId'],
                     params['snoozeUntil'],
+                  ),
+        ),
+      },
+    );
+    connectors['userProfile'] = _i1.EndpointConnector(
+      name: 'userProfile',
+      endpoint: endpoints['userProfile']!,
+      methodConnectors: {
+        'getProfile': _i1.MethodConnector(
+          name: 'getProfile',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['userProfile'] as _i8.UserProfileEndpoint)
+                  .getProfile(session),
+        ),
+        'updateHydration': _i1.MethodConnector(
+          name: 'updateHydration',
+          params: {
+            'goal': _i1.ParameterDescription(
+              name: 'goal',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'count': _i1.ParameterDescription(
+              name: 'count',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'date': _i1.ParameterDescription(
+              name: 'date',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'reminder': _i1.ParameterDescription(
+              name: 'reminder',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+            'history': _i1.ParameterDescription(
+              name: 'history',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['userProfile'] as _i8.UserProfileEndpoint)
+                  .updateHydration(
+                    session,
+                    params['goal'],
+                    params['count'],
+                    params['date'],
+                    params['reminder'],
+                    params['history'],
                   ),
         ),
       },
@@ -371,17 +638,17 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['greeting'] as _i5.GreetingEndpoint).hello(
+              ) async => (endpoints['greeting'] as _i9.GreetingEndpoint).hello(
                 session,
                 params['name'],
               ),
         ),
       },
     );
-    modules['serverpod_auth'] = _i8.Endpoints()..initializeEndpoints(server);
-    modules['serverpod_auth_idp'] = _i9.Endpoints()
+    modules['serverpod_auth'] = _i13.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth_idp'] = _i14.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i10.Endpoints()
+    modules['serverpod_auth_core'] = _i15.Endpoints()
       ..initializeEndpoints(server);
   }
 }

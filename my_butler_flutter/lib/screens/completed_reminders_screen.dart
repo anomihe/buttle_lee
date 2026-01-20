@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_butler_client/my_butler_client.dart';
 import 'package:provider/provider.dart';
 import '../providers/reminder_provider.dart';
-import '../widgets/reminder_card.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CompletedRemindersScreen extends StatefulWidget {
   const CompletedRemindersScreen({super.key});
@@ -52,19 +52,7 @@ class _CompletedRemindersScreenState extends State<CompletedRemindersScreen> {
       ),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: isDark
-                ? [
-                    const Color(0xFF0D2137),
-                    const Color(0xFF0A1628),
-                  ]
-                : [
-                    const Color(0xFFE8F5F3),
-                    const Color(0xFFF5F9F8),
-                  ],
-          ),
+          color: Theme.of(context).scaffoldBackgroundColor, // Clean background
         ),
         child: _isLoading
             ? Center(
@@ -74,19 +62,49 @@ class _CompletedRemindersScreenState extends State<CompletedRemindersScreen> {
               )
             : _completedReminders.isEmpty
                 ? _buildEmptyState(context, isDark)
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                : ListView.separated(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 24),
                     itemCount: _completedReminders.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final reminder = _completedReminders[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Opacity(
-                          opacity: 0.7,
-                          child: ReminderCard(
-                            reminder: reminder,
-                            onEdit: _loadCompletedReminders,
-                            onDelete: () async {
+                      // Use a simplified card view for history
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border:
+                              Border.all(color: Colors.grey.withOpacity(0.1)),
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          leading: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.1),
+                                shape: BoxShape.circle),
+                            child: const Icon(Icons.check,
+                                color: Colors.green, size: 20),
+                          ),
+                          title: Text(
+                            reminder.description,
+                            style: GoogleFonts.outfit(
+                              decoration: TextDecoration.lineThrough,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            "Completed", // Could add date here if we tracked completion date explicitly
+                            style: GoogleFonts.outfit(
+                                fontSize: 12, color: Colors.grey),
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline,
+                                size: 20, color: Colors.redAccent),
+                            onPressed: () async {
                               await context
                                   .read<ReminderProvider>()
                                   .deleteReminder(reminder.id!);
@@ -106,36 +124,12 @@ class _CompletedRemindersScreenState extends State<CompletedRemindersScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.grey.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.check_circle_outline,
-              size: 48,
-              color: isDark ? Colors.white30 : Colors.grey[400],
-            ),
-          ),
-          const SizedBox(height: 20),
+          Icon(Icons.history_edu_outlined,
+              size: 64, color: Colors.grey.withOpacity(0.5)),
+          const SizedBox(height: 16),
           Text(
-            'No completed reminders',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: isDark ? Colors.white70 : Colors.black54,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Executed reminders will appear here',
-            style: TextStyle(
-              fontSize: 14,
-              color: isDark ? Colors.white38 : Colors.grey[500],
-            ),
+            "No history yet",
+            style: GoogleFonts.outfit(fontSize: 18, color: Colors.grey),
           ),
         ],
       ),

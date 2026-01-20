@@ -1,0 +1,9 @@
+class: Book
+table: book
+fields:
+  userId: int
+  title: String
+  author: String
+  status: int # 0: Reading, 1: Finished
+  startedDate: DateTime
+  finishedDate: DateTime?

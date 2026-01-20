@@ -17,14 +17,23 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _i4;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i5;
-import 'butler_reminder.dart' as _i6;
-import 'greeting.dart' as _i7;
-import 'priority.dart' as _i8;
-import 'reminder_type.dart' as _i9;
-import 'user_profile.dart' as _i10;
-import 'package:my_butler_server/src/generated/butler_reminder.dart' as _i11;
+import 'book.dart' as _i6;
+import 'butler_reminder.dart' as _i7;
+import 'greeting.dart' as _i8;
+import 'household.dart' as _i9;
+import 'household_member.dart' as _i10;
+import 'priority.dart' as _i11;
+import 'reminder_type.dart' as _i12;
+import 'user_profile.dart' as _i13;
+import 'package:my_butler_server/src/generated/book.dart' as _i14;
+import 'package:my_butler_server/src/generated/user_profile.dart' as _i15;
+import 'package:my_butler_server/src/generated/household.dart' as _i16;
+import 'package:my_butler_server/src/generated/butler_reminder.dart' as _i17;
+export 'book.dart';
 export 'butler_reminder.dart';
 export 'greeting.dart';
+export 'household.dart';
+export 'household_member.dart';
 export 'priority.dart';
 export 'reminder_type.dart';
 export 'user_profile.dart';
@@ -37,6 +46,74 @@ class Protocol extends _i1.SerializationManagerServer {
   static final Protocol _instance = Protocol._();
 
   static final List<_i2.TableDefinition> targetTableDefinitions = [
+    _i2.TableDefinition(
+      name: 'book',
+      dartName: 'Book',
+      schema: 'public',
+      module: 'my_butler',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'book_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'title',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'author',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'status',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'startedDate',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'finishedDate',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'book_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+      ],
+      managed: true,
+    ),
     _i2.TableDefinition(
       name: 'butler_reminder',
       dartName: 'ButlerReminder',
@@ -94,6 +171,12 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'bool',
           columnDefault: 'true',
         ),
+        _i2.ColumnDefinition(
+          name: 'assignedToUserId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
       ],
       foreignKeys: [],
       indexes: [
@@ -109,6 +192,142 @@ class Protocol extends _i1.SerializationManagerServer {
           type: 'btree',
           isUnique: true,
           isPrimary: true,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'household',
+      dartName: 'Household',
+      schema: 'public',
+      module: 'my_butler',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'household_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'name',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'joinCode',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'adminId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'household_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'joinCode_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'joinCode',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'household_member',
+      dartName: 'HouseholdMember',
+      schema: 'public',
+      module: 'my_butler',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'household_member_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'householdId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'role',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'joinedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'household_member_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'household_user_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'householdId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
         ),
       ],
       managed: true,
@@ -149,6 +368,53 @@ class Protocol extends _i1.SerializationManagerServer {
           columnType: _i2.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'xp',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _i2.ColumnDefinition(
+          name: 'level',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '1',
+        ),
+        _i2.ColumnDefinition(
+          name: 'hydrationGoal',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '8',
+        ),
+        _i2.ColumnDefinition(
+          name: 'hydrationCount',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _i2.ColumnDefinition(
+          name: 'hydrationDate',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'hydrationReminder',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _i2.ColumnDefinition(
+          name: 'hydrationHistory',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
         ),
       ],
       foreignKeys: [],
@@ -215,39 +481,76 @@ class Protocol extends _i1.SerializationManagerServer {
       }
     }
 
-    if (t == _i6.ButlerReminder) {
-      return _i6.ButlerReminder.fromJson(data) as T;
+    if (t == _i6.Book) {
+      return _i6.Book.fromJson(data) as T;
     }
-    if (t == _i7.Greeting) {
-      return _i7.Greeting.fromJson(data) as T;
+    if (t == _i7.ButlerReminder) {
+      return _i7.ButlerReminder.fromJson(data) as T;
     }
-    if (t == _i8.Priority) {
-      return _i8.Priority.fromJson(data) as T;
+    if (t == _i8.Greeting) {
+      return _i8.Greeting.fromJson(data) as T;
     }
-    if (t == _i9.ReminderType) {
-      return _i9.ReminderType.fromJson(data) as T;
+    if (t == _i9.Household) {
+      return _i9.Household.fromJson(data) as T;
     }
-    if (t == _i10.UserProfile) {
-      return _i10.UserProfile.fromJson(data) as T;
+    if (t == _i10.HouseholdMember) {
+      return _i10.HouseholdMember.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i6.ButlerReminder?>()) {
-      return (data != null ? _i6.ButlerReminder.fromJson(data) : null) as T;
+    if (t == _i11.Priority) {
+      return _i11.Priority.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i7.Greeting?>()) {
-      return (data != null ? _i7.Greeting.fromJson(data) : null) as T;
+    if (t == _i12.ReminderType) {
+      return _i12.ReminderType.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i8.Priority?>()) {
-      return (data != null ? _i8.Priority.fromJson(data) : null) as T;
+    if (t == _i13.UserProfile) {
+      return _i13.UserProfile.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i9.ReminderType?>()) {
-      return (data != null ? _i9.ReminderType.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i6.Book?>()) {
+      return (data != null ? _i6.Book.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i10.UserProfile?>()) {
-      return (data != null ? _i10.UserProfile.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i7.ButlerReminder?>()) {
+      return (data != null ? _i7.ButlerReminder.fromJson(data) : null) as T;
     }
-    if (t == List<_i11.ButlerReminder>) {
+    if (t == _i1.getType<_i8.Greeting?>()) {
+      return (data != null ? _i8.Greeting.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i9.Household?>()) {
+      return (data != null ? _i9.Household.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i10.HouseholdMember?>()) {
+      return (data != null ? _i10.HouseholdMember.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i11.Priority?>()) {
+      return (data != null ? _i11.Priority.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i12.ReminderType?>()) {
+      return (data != null ? _i12.ReminderType.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i13.UserProfile?>()) {
+      return (data != null ? _i13.UserProfile.fromJson(data) : null) as T;
+    }
+    if (t == Map<String, int>) {
+      return (data as Map).map(
+            (k, v) => MapEntry(deserialize<String>(k), deserialize<int>(v)),
+          )
+          as T;
+    }
+    if (t == List<_i14.Book>) {
+      return (data as List).map((e) => deserialize<_i14.Book>(e)).toList() as T;
+    }
+    if (t == List<_i15.UserProfile>) {
       return (data as List)
-              .map((e) => deserialize<_i11.ButlerReminder>(e))
+              .map((e) => deserialize<_i15.UserProfile>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i16.Household>) {
+      return (data as List).map((e) => deserialize<_i16.Household>(e)).toList()
+          as T;
+    }
+    if (t == List<_i17.ButlerReminder>) {
+      return (data as List)
+              .map((e) => deserialize<_i17.ButlerReminder>(e))
               .toList()
           as T;
     }
@@ -268,11 +571,14 @@ class Protocol extends _i1.SerializationManagerServer {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
-      _i6.ButlerReminder => 'ButlerReminder',
-      _i7.Greeting => 'Greeting',
-      _i8.Priority => 'Priority',
-      _i9.ReminderType => 'ReminderType',
-      _i10.UserProfile => 'UserProfile',
+      _i6.Book => 'Book',
+      _i7.ButlerReminder => 'ButlerReminder',
+      _i8.Greeting => 'Greeting',
+      _i9.Household => 'Household',
+      _i10.HouseholdMember => 'HouseholdMember',
+      _i11.Priority => 'Priority',
+      _i12.ReminderType => 'ReminderType',
+      _i13.UserProfile => 'UserProfile',
       _ => null,
     };
   }
@@ -287,15 +593,21 @@ class Protocol extends _i1.SerializationManagerServer {
     }
 
     switch (data) {
-      case _i6.ButlerReminder():
+      case _i6.Book():
+        return 'Book';
+      case _i7.ButlerReminder():
         return 'ButlerReminder';
-      case _i7.Greeting():
+      case _i8.Greeting():
         return 'Greeting';
-      case _i8.Priority():
+      case _i9.Household():
+        return 'Household';
+      case _i10.HouseholdMember():
+        return 'HouseholdMember';
+      case _i11.Priority():
         return 'Priority';
-      case _i9.ReminderType():
+      case _i12.ReminderType():
         return 'ReminderType';
-      case _i10.UserProfile():
+      case _i13.UserProfile():
         return 'UserProfile';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -323,20 +635,29 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
     }
+    if (dataClassName == 'Book') {
+      return deserialize<_i6.Book>(data['data']);
+    }
     if (dataClassName == 'ButlerReminder') {
-      return deserialize<_i6.ButlerReminder>(data['data']);
+      return deserialize<_i7.ButlerReminder>(data['data']);
     }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i7.Greeting>(data['data']);
+      return deserialize<_i8.Greeting>(data['data']);
+    }
+    if (dataClassName == 'Household') {
+      return deserialize<_i9.Household>(data['data']);
+    }
+    if (dataClassName == 'HouseholdMember') {
+      return deserialize<_i10.HouseholdMember>(data['data']);
     }
     if (dataClassName == 'Priority') {
-      return deserialize<_i8.Priority>(data['data']);
+      return deserialize<_i11.Priority>(data['data']);
     }
     if (dataClassName == 'ReminderType') {
-      return deserialize<_i9.ReminderType>(data['data']);
+      return deserialize<_i12.ReminderType>(data['data']);
     }
     if (dataClassName == 'UserProfile') {
-      return deserialize<_i10.UserProfile>(data['data']);
+      return deserialize<_i13.UserProfile>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -384,10 +705,16 @@ class Protocol extends _i1.SerializationManagerServer {
       }
     }
     switch (t) {
-      case _i6.ButlerReminder:
-        return _i6.ButlerReminder.t;
-      case _i10.UserProfile:
-        return _i10.UserProfile.t;
+      case _i6.Book:
+        return _i6.Book.t;
+      case _i7.ButlerReminder:
+        return _i7.ButlerReminder.t;
+      case _i9.Household:
+        return _i9.Household.t;
+      case _i10.HouseholdMember:
+        return _i10.HouseholdMember.t;
+      case _i13.UserProfile:
+        return _i13.UserProfile.t;
     }
     return null;
   }

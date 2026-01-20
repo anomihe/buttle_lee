@@ -1,0 +1,10 @@
+class: Household
+table: household
+fields:
+  name: String
+  joinCode: String
+  adminId: int
+indexes:
+  joinCode_idx:
+    fields: joinCode
+    unique: true

@@ -8,8 +8,16 @@ import 'screens/dashboard/dashboard_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/persona_provider.dart';
 import 'providers/reminder_provider.dart';
+import 'providers/book_provider.dart';
+import 'services/notification_service.dart';
 
-void main() {
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
+  await NotificationService().init();
   runApp(const MyApp());
 }
 
@@ -35,6 +43,13 @@ class MyApp extends StatelessWidget {
           ),
           update: (context, auth, previous) =>
               previous ?? ReminderProvider(client: auth.client),
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, BookProvider>(
+          create: (context) => BookProvider(
+            client: context.read<AuthProvider>().client,
+          ),
+          update: (context, auth, previous) =>
+              previous ?? BookProvider(client: auth.client),
         ),
       ],
       child: Consumer<PersonaProvider>(

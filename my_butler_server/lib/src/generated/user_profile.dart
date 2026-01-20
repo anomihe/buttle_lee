@@ -20,7 +20,18 @@ abstract class UserProfile
     required this.email,
     this.profileImageUrl,
     required this.userInfoId,
-  });
+    int? xp,
+    int? level,
+    int? hydrationGoal,
+    int? hydrationCount,
+    this.hydrationDate,
+    bool? hydrationReminder,
+    this.hydrationHistory,
+  }) : xp = xp ?? 0,
+       level = level ?? 1,
+       hydrationGoal = hydrationGoal ?? 8,
+       hydrationCount = hydrationCount ?? 0,
+       hydrationReminder = hydrationReminder ?? false;
 
   factory UserProfile({
     int? id,
@@ -28,6 +39,13 @@ abstract class UserProfile
     required String email,
     String? profileImageUrl,
     required int userInfoId,
+    int? xp,
+    int? level,
+    int? hydrationGoal,
+    int? hydrationCount,
+    String? hydrationDate,
+    bool? hydrationReminder,
+    String? hydrationHistory,
   }) = _UserProfileImpl;
 
   factory UserProfile.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -37,6 +55,13 @@ abstract class UserProfile
       email: jsonSerialization['email'] as String,
       profileImageUrl: jsonSerialization['profileImageUrl'] as String?,
       userInfoId: jsonSerialization['userInfoId'] as int,
+      xp: jsonSerialization['xp'] as int,
+      level: jsonSerialization['level'] as int,
+      hydrationGoal: jsonSerialization['hydrationGoal'] as int,
+      hydrationCount: jsonSerialization['hydrationCount'] as int,
+      hydrationDate: jsonSerialization['hydrationDate'] as String?,
+      hydrationReminder: jsonSerialization['hydrationReminder'] as bool,
+      hydrationHistory: jsonSerialization['hydrationHistory'] as String?,
     );
   }
 
@@ -55,6 +80,20 @@ abstract class UserProfile
 
   int userInfoId;
 
+  int xp;
+
+  int level;
+
+  int hydrationGoal;
+
+  int hydrationCount;
+
+  String? hydrationDate;
+
+  bool hydrationReminder;
+
+  String? hydrationHistory;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -67,6 +106,13 @@ abstract class UserProfile
     String? email,
     String? profileImageUrl,
     int? userInfoId,
+    int? xp,
+    int? level,
+    int? hydrationGoal,
+    int? hydrationCount,
+    String? hydrationDate,
+    bool? hydrationReminder,
+    String? hydrationHistory,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -77,6 +123,13 @@ abstract class UserProfile
       'email': email,
       if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
       'userInfoId': userInfoId,
+      'xp': xp,
+      'level': level,
+      'hydrationGoal': hydrationGoal,
+      'hydrationCount': hydrationCount,
+      if (hydrationDate != null) 'hydrationDate': hydrationDate,
+      'hydrationReminder': hydrationReminder,
+      if (hydrationHistory != null) 'hydrationHistory': hydrationHistory,
     };
   }
 
@@ -89,6 +142,13 @@ abstract class UserProfile
       'email': email,
       if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
       'userInfoId': userInfoId,
+      'xp': xp,
+      'level': level,
+      'hydrationGoal': hydrationGoal,
+      'hydrationCount': hydrationCount,
+      if (hydrationDate != null) 'hydrationDate': hydrationDate,
+      'hydrationReminder': hydrationReminder,
+      if (hydrationHistory != null) 'hydrationHistory': hydrationHistory,
     };
   }
 
@@ -131,12 +191,26 @@ class _UserProfileImpl extends UserProfile {
     required String email,
     String? profileImageUrl,
     required int userInfoId,
+    int? xp,
+    int? level,
+    int? hydrationGoal,
+    int? hydrationCount,
+    String? hydrationDate,
+    bool? hydrationReminder,
+    String? hydrationHistory,
   }) : super._(
          id: id,
          fullName: fullName,
          email: email,
          profileImageUrl: profileImageUrl,
          userInfoId: userInfoId,
+         xp: xp,
+         level: level,
+         hydrationGoal: hydrationGoal,
+         hydrationCount: hydrationCount,
+         hydrationDate: hydrationDate,
+         hydrationReminder: hydrationReminder,
+         hydrationHistory: hydrationHistory,
        );
 
   /// Returns a shallow copy of this [UserProfile]
@@ -149,6 +223,13 @@ class _UserProfileImpl extends UserProfile {
     String? email,
     Object? profileImageUrl = _Undefined,
     int? userInfoId,
+    int? xp,
+    int? level,
+    int? hydrationGoal,
+    int? hydrationCount,
+    Object? hydrationDate = _Undefined,
+    bool? hydrationReminder,
+    Object? hydrationHistory = _Undefined,
   }) {
     return UserProfile(
       id: id is int? ? id : this.id,
@@ -158,6 +239,17 @@ class _UserProfileImpl extends UserProfile {
           ? profileImageUrl
           : this.profileImageUrl,
       userInfoId: userInfoId ?? this.userInfoId,
+      xp: xp ?? this.xp,
+      level: level ?? this.level,
+      hydrationGoal: hydrationGoal ?? this.hydrationGoal,
+      hydrationCount: hydrationCount ?? this.hydrationCount,
+      hydrationDate: hydrationDate is String?
+          ? hydrationDate
+          : this.hydrationDate,
+      hydrationReminder: hydrationReminder ?? this.hydrationReminder,
+      hydrationHistory: hydrationHistory is String?
+          ? hydrationHistory
+          : this.hydrationHistory,
     );
   }
 }
@@ -185,6 +277,43 @@ class UserProfileUpdateTable extends _i1.UpdateTable<UserProfileTable> {
     table.userInfoId,
     value,
   );
+
+  _i1.ColumnValue<int, int> xp(int value) => _i1.ColumnValue(
+    table.xp,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> level(int value) => _i1.ColumnValue(
+    table.level,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> hydrationGoal(int value) => _i1.ColumnValue(
+    table.hydrationGoal,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> hydrationCount(int value) => _i1.ColumnValue(
+    table.hydrationCount,
+    value,
+  );
+
+  _i1.ColumnValue<String, String> hydrationDate(String? value) =>
+      _i1.ColumnValue(
+        table.hydrationDate,
+        value,
+      );
+
+  _i1.ColumnValue<bool, bool> hydrationReminder(bool value) => _i1.ColumnValue(
+    table.hydrationReminder,
+    value,
+  );
+
+  _i1.ColumnValue<String, String> hydrationHistory(String? value) =>
+      _i1.ColumnValue(
+        table.hydrationHistory,
+        value,
+      );
 }
 
 class UserProfileTable extends _i1.Table<int?> {
@@ -206,6 +335,39 @@ class UserProfileTable extends _i1.Table<int?> {
       'userInfoId',
       this,
     );
+    xp = _i1.ColumnInt(
+      'xp',
+      this,
+      hasDefault: true,
+    );
+    level = _i1.ColumnInt(
+      'level',
+      this,
+      hasDefault: true,
+    );
+    hydrationGoal = _i1.ColumnInt(
+      'hydrationGoal',
+      this,
+      hasDefault: true,
+    );
+    hydrationCount = _i1.ColumnInt(
+      'hydrationCount',
+      this,
+      hasDefault: true,
+    );
+    hydrationDate = _i1.ColumnString(
+      'hydrationDate',
+      this,
+    );
+    hydrationReminder = _i1.ColumnBool(
+      'hydrationReminder',
+      this,
+      hasDefault: true,
+    );
+    hydrationHistory = _i1.ColumnString(
+      'hydrationHistory',
+      this,
+    );
   }
 
   late final UserProfileUpdateTable updateTable;
@@ -218,6 +380,20 @@ class UserProfileTable extends _i1.Table<int?> {
 
   late final _i1.ColumnInt userInfoId;
 
+  late final _i1.ColumnInt xp;
+
+  late final _i1.ColumnInt level;
+
+  late final _i1.ColumnInt hydrationGoal;
+
+  late final _i1.ColumnInt hydrationCount;
+
+  late final _i1.ColumnString hydrationDate;
+
+  late final _i1.ColumnBool hydrationReminder;
+
+  late final _i1.ColumnString hydrationHistory;
+
   @override
   List<_i1.Column> get columns => [
     id,
@@ -225,6 +401,13 @@ class UserProfileTable extends _i1.Table<int?> {
     email,
     profileImageUrl,
     userInfoId,
+    xp,
+    level,
+    hydrationGoal,
+    hydrationCount,
+    hydrationDate,
+    hydrationReminder,
+    hydrationHistory,
   ];
 }
 

@@ -1,6 +1,7 @@
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_server/serverpod_auth_server.dart';
 import '../generated/protocol.dart';
+import '../services/gamification_service.dart';
 
 /// Endpoint for managing reminders
 class ReminderEndpoint extends Endpoint {
@@ -156,6 +157,12 @@ class ReminderEndpoint extends Endpoint {
     final reminder = await ButlerReminder.db.findById(session, reminderId);
     if (reminder == null || reminder.userId != userId) {
       throw Exception('Reminder not found or access denied');
+    }
+
+    if (reminder.isActive) {
+      // Award XP for completing (deleting) the task
+      await GamificationService.addXp(
+          session, userId, GamificationService.xpPerTask);
     }
 
     reminder.isActive = false;

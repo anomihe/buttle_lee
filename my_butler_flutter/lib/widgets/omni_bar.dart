@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/auth_provider.dart';
 import '../providers/reminder_provider.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class OmniBar extends StatefulWidget {
   const OmniBar({super.key});
 
   @override
-  State<OmniBar> createState() => _OmniBarState();
+  State<OmniBar> createState() => OmniBarState();
 }
 
-class _OmniBarState extends State<OmniBar> with SingleTickerProviderStateMixin {
+class OmniBarState extends State<OmniBar> with SingleTickerProviderStateMixin {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   bool _isProcessing = false;
@@ -19,10 +22,20 @@ class _OmniBarState extends State<OmniBar> with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
+  // Voice Input
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isListening = false;
+  bool _speechAvailable = false;
+
   @override
   void initState() {
     super.initState();
     _focusNode.addListener(_onFocusChange);
+    // Listen to text changes to update UI (mic vs send button)
+    _controller.addListener(() {
+      setState(() {});
+    });
+    _initSpeech();
 
     // Subtle pulse animation for AI icon
     _pulseController = AnimationController(
@@ -35,8 +48,30 @@ class _OmniBarState extends State<OmniBar> with SingleTickerProviderStateMixin {
     );
   }
 
+  void _initSpeech() async {
+    try {
+      _speechAvailable = await _speech.initialize(
+        onStatus: (status) {
+          if (status == 'notListening') {
+            setState(() => _isListening = false);
+          }
+        },
+        onError: (errorNotification) {
+          setState(() => _isListening = false);
+          debugPrint('Speech error: $errorNotification');
+        },
+      );
+      setState(() {});
+    } catch (e) {
+      debugPrint('Error initializing speech: $e');
+    }
+  }
+
   void _onFocusChange() {
     setState(() => _isFocused = _focusNode.hasFocus);
+    if (_isFocused) {
+      HapticFeedback.selectionClick();
+    }
   }
 
   @override
@@ -45,10 +80,57 @@ class _OmniBarState extends State<OmniBar> with SingleTickerProviderStateMixin {
     _focusNode.removeListener(_onFocusChange);
     _focusNode.dispose();
     _pulseController.dispose();
+    _speech.cancel();
     super.dispose();
   }
 
+  void _listen() async {
+    if (!_speechAvailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Speech recognition not available')),
+      );
+      return;
+    }
+
+    if (_isListening) {
+      _speech.stop();
+      setState(() => _isListening = false);
+    } else {
+      setState(() => _isListening = true);
+      HapticFeedback.mediumImpact();
+      _speech.listen(
+        onResult: (result) {
+          setState(() {
+            _controller.text = result.recognizedWords;
+            // Move cursor to end
+            _controller.selection = TextSelection.fromPosition(
+              TextPosition(offset: _controller.text.length),
+            );
+          });
+        },
+        listenFor: const Duration(seconds: 30),
+        pauseFor: const Duration(seconds: 5),
+        localeId: "en_US",
+        onSoundLevelChange: (level) {
+          // Can use this to animate microphone if desired
+        },
+      );
+    }
+  }
+
+  /// Public method to programmatically submit a command
+  void submitCommand(String command) {
+    _controller.text = command;
+    _processCommand();
+  }
+
   Future<void> _processCommand() async {
+    // If listening, stop first
+    if (_isListening) {
+      _speech.stop();
+      setState(() => _isListening = false);
+    }
+
     final command = _controller.text.trim();
     if (command.isEmpty) return;
 
@@ -176,12 +258,15 @@ class _OmniBarState extends State<OmniBar> with SingleTickerProviderStateMixin {
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    onSubmitted: (_) => _processCommand(),
+                    onSubmitted: (_) {
+                      HapticFeedback.lightImpact();
+                      _processCommand();
+                    },
                     enabled: !_isProcessing,
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Send Button
+                // Send Button or Mic Button
                 if (_isProcessing)
                   const SizedBox(
                     width: 24,
@@ -189,35 +274,80 @@ class _OmniBarState extends State<OmniBar> with SingleTickerProviderStateMixin {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 else
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _processCommand,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Theme.of(context).colorScheme.primary,
-                              Theme.of(context).colorScheme.tertiary,
-                            ],
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Show Mic if text is empty OR if currently listening
+                      if (_controller.text.isEmpty || _isListening)
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: _listen,
+                            borderRadius: BorderRadius.circular(20),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: _isListening
+                                    ? Colors.redAccent.withOpacity(0.1)
+                                    : Colors.transparent,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _isListening
+                                    ? Icons.mic_off_rounded
+                                    : Icons.mic_rounded,
+                                color: _isListening
+                                    ? Colors.redAccent
+                                    : (isDark
+                                        ? Colors.white70
+                                        : Colors.black54),
+                                size: 22,
+                              ),
+                            ),
                           ),
-                          shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.arrow_upward_rounded,
-                          color: Colors.white,
-                          size: 20,
+
+                      // Show Send if text is NOT empty (and not listening, or alongside?)
+                      // Let's show Send only if there is text.
+                      if (_controller.text.isNotEmpty) ...[
+                        if (_controller.text.isNotEmpty && _isListening)
+                          const SizedBox(width: 4),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              _processCommand();
+                            },
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Theme.of(context).colorScheme.primary,
+                                    Theme.of(context).colorScheme.tertiary,
+                                  ],
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_upward_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      ],
+                    ],
                   ),
               ],
             ),
           ),
         ),
       ),
-    );
+    ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.2, end: 0);
   }
 }

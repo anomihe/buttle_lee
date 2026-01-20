@@ -13,16 +13,18 @@
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'dart:async' as _i2;
 import 'package:my_butler_client/src/protocol/user_profile.dart' as _i3;
-import 'package:my_butler_client/src/protocol/butler_reminder.dart' as _i4;
-import 'package:my_butler_client/src/protocol/reminder_type.dart' as _i5;
-import 'package:my_butler_client/src/protocol/priority.dart' as _i6;
-import 'package:my_butler_client/src/protocol/greeting.dart' as _i7;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i8;
+import 'package:my_butler_client/src/protocol/book.dart' as _i4;
+import 'package:my_butler_client/src/protocol/household.dart' as _i5;
+import 'package:my_butler_client/src/protocol/butler_reminder.dart' as _i6;
+import 'package:my_butler_client/src/protocol/reminder_type.dart' as _i7;
+import 'package:my_butler_client/src/protocol/priority.dart' as _i8;
+import 'package:my_butler_client/src/protocol/greeting.dart' as _i9;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i10;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i9;
+    as _i11;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
-    as _i10;
-import 'protocol.dart' as _i11;
+    as _i12;
+import 'protocol.dart' as _i13;
 
 /// Endpoint for AI-powered command processing
 /// {@category Endpoint}
@@ -38,6 +40,22 @@ class EndpointAi extends _i1.EndpointRef {
         'ai',
         'processCommand',
         {'command': command},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointAnalytics extends _i1.EndpointRef {
+  EndpointAnalytics(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'analytics';
+
+  /// Returns a map of DayOfWeek -> Completion Count for the last 7 days
+  _i2.Future<Map<String, int>> getWeeklyProductivity() =>
+      caller.callServerEndpoint<Map<String, int>>(
+        'analytics',
+        'getWeeklyProductivity',
+        {},
       );
 }
 
@@ -98,6 +116,89 @@ class EndpointAuth extends _i1.EndpointRef {
       );
 }
 
+/// {@category Endpoint}
+class EndpointBook extends _i1.EndpointRef {
+  EndpointBook(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'book';
+
+  _i2.Future<void> addBook(_i4.Book book) => caller.callServerEndpoint<void>(
+    'book',
+    'addBook',
+    {'book': book},
+  );
+
+  _i2.Future<List<_i4.Book>> getBooks() =>
+      caller.callServerEndpoint<List<_i4.Book>>(
+        'book',
+        'getBooks',
+        {},
+      );
+
+  _i2.Future<void> finishBook(int id) => caller.callServerEndpoint<void>(
+    'book',
+    'finishBook',
+    {'id': id},
+  );
+}
+
+/// {@category Endpoint}
+class EndpointHousehold extends _i1.EndpointRef {
+  EndpointHousehold(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'household';
+
+  /// Create a new household
+  _i2.Future<_i5.Household?> createHousehold(String name) =>
+      caller.callServerEndpoint<_i5.Household?>(
+        'household',
+        'createHousehold',
+        {'name': name},
+      );
+
+  /// Join a household by code
+  _i2.Future<bool> joinHousehold(String joinCode) =>
+      caller.callServerEndpoint<bool>(
+        'household',
+        'joinHousehold',
+        {'joinCode': joinCode},
+      );
+
+  /// Get members of a specific household (or user's first one)
+  _i2.Future<List<_i3.UserProfile>> getHouseholdMembers({int? householdId}) =>
+      caller.callServerEndpoint<List<_i3.UserProfile>>(
+        'household',
+        'getHouseholdMembers',
+        {'householdId': householdId},
+      );
+
+  /// Get all households the user is a member of
+  _i2.Future<List<_i5.Household>> getMyHouseholds() =>
+      caller.callServerEndpoint<List<_i5.Household>>(
+        'household',
+        'getMyHouseholds',
+        {},
+      );
+
+  /// Leave a specific household
+  _i2.Future<bool> leaveHousehold(int householdId) =>
+      caller.callServerEndpoint<bool>(
+        'household',
+        'leaveHousehold',
+        {'householdId': householdId},
+      );
+
+  /// Delete the current household (if admin)
+  _i2.Future<bool> deleteHousehold(int householdId) =>
+      caller.callServerEndpoint<bool>(
+        'household',
+        'deleteHousehold',
+        {'householdId': householdId},
+      );
+}
+
 /// Endpoint for managing reminders
 /// {@category Endpoint}
 class EndpointReminder extends _i1.EndpointRef {
@@ -107,12 +208,12 @@ class EndpointReminder extends _i1.EndpointRef {
   String get name => 'reminder';
 
   /// Create a new reminder and schedule its execution
-  _i2.Future<_i4.ButlerReminder?> createReminder(
+  _i2.Future<_i6.ButlerReminder?> createReminder(
     String description,
     DateTime triggerTime,
-    _i5.ReminderType reminderType, {
-    required _i6.Priority priority,
-  }) => caller.callServerEndpoint<_i4.ButlerReminder?>(
+    _i7.ReminderType reminderType, {
+    required _i8.Priority priority,
+  }) => caller.callServerEndpoint<_i6.ButlerReminder?>(
     'reminder',
     'createReminder',
     {
@@ -124,26 +225,26 @@ class EndpointReminder extends _i1.EndpointRef {
   );
 
   /// Get all reminders for the authenticated user
-  _i2.Future<List<_i4.ButlerReminder>> getUserReminders() =>
-      caller.callServerEndpoint<List<_i4.ButlerReminder>>(
+  _i2.Future<List<_i6.ButlerReminder>> getUserReminders() =>
+      caller.callServerEndpoint<List<_i6.ButlerReminder>>(
         'reminder',
         'getUserReminders',
         {},
       );
 
   /// Get completed (inactive) reminders for the authenticated user
-  _i2.Future<List<_i4.ButlerReminder>> getCompletedReminders() =>
-      caller.callServerEndpoint<List<_i4.ButlerReminder>>(
+  _i2.Future<List<_i6.ButlerReminder>> getCompletedReminders() =>
+      caller.callServerEndpoint<List<_i6.ButlerReminder>>(
         'reminder',
         'getCompletedReminders',
         {},
       );
 
   /// Get upcoming reminders within a time range
-  _i2.Future<List<_i4.ButlerReminder>> getUpcomingReminders(
+  _i2.Future<List<_i6.ButlerReminder>> getUpcomingReminders(
     DateTime startTime,
     DateTime endTime,
-  ) => caller.callServerEndpoint<List<_i4.ButlerReminder>>(
+  ) => caller.callServerEndpoint<List<_i6.ButlerReminder>>(
     'reminder',
     'getUpcomingReminders',
     {
@@ -153,13 +254,13 @@ class EndpointReminder extends _i1.EndpointRef {
   );
 
   /// Update a reminder
-  _i2.Future<_i4.ButlerReminder?> updateReminder(
+  _i2.Future<_i6.ButlerReminder?> updateReminder(
     int reminderId,
     String? description,
     DateTime? triggerTime,
-    _i5.ReminderType? reminderType, {
-    _i6.Priority? priority,
-  }) => caller.callServerEndpoint<_i4.ButlerReminder?>(
+    _i7.ReminderType? reminderType, {
+    _i8.Priority? priority,
+  }) => caller.callServerEndpoint<_i6.ButlerReminder?>(
     'reminder',
     'updateReminder',
     {
@@ -180,15 +281,48 @@ class EndpointReminder extends _i1.EndpointRef {
       );
 
   /// Snooze a reminder to a later time
-  _i2.Future<_i4.ButlerReminder?> snoozeReminder(
+  _i2.Future<_i6.ButlerReminder?> snoozeReminder(
     int reminderId,
     DateTime snoozeUntil,
-  ) => caller.callServerEndpoint<_i4.ButlerReminder?>(
+  ) => caller.callServerEndpoint<_i6.ButlerReminder?>(
     'reminder',
     'snoozeReminder',
     {
       'reminderId': reminderId,
       'snoozeUntil': snoozeUntil,
+    },
+  );
+}
+
+/// {@category Endpoint}
+class EndpointUserProfile extends _i1.EndpointRef {
+  EndpointUserProfile(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'userProfile';
+
+  _i2.Future<_i3.UserProfile?> getProfile() =>
+      caller.callServerEndpoint<_i3.UserProfile?>(
+        'userProfile',
+        'getProfile',
+        {},
+      );
+
+  _i2.Future<void> updateHydration(
+    int goal,
+    int count,
+    String? date,
+    bool reminder,
+    String? history,
+  ) => caller.callServerEndpoint<void>(
+    'userProfile',
+    'updateHydration',
+    {
+      'goal': goal,
+      'count': count,
+      'date': date,
+      'reminder': reminder,
+      'history': history,
     },
   );
 }
@@ -203,8 +337,8 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i7.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i7.Greeting>(
+  _i2.Future<_i9.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i9.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -213,16 +347,16 @@ class EndpointGreeting extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i8.Caller(client);
-    serverpod_auth_idp = _i9.Caller(client);
-    serverpod_auth_core = _i10.Caller(client);
+    auth = _i10.Caller(client);
+    serverpod_auth_idp = _i11.Caller(client);
+    serverpod_auth_core = _i12.Caller(client);
   }
 
-  late final _i8.Caller auth;
+  late final _i10.Caller auth;
 
-  late final _i9.Caller serverpod_auth_idp;
+  late final _i11.Caller serverpod_auth_idp;
 
-  late final _i10.Caller serverpod_auth_core;
+  late final _i12.Caller serverpod_auth_core;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -245,7 +379,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i11.Protocol(),
+         _i13.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -255,17 +389,29 @@ class Client extends _i1.ServerpodClientShared {
              disconnectStreamsOnLostInternetConnection,
        ) {
     ai = EndpointAi(this);
+    analytics = EndpointAnalytics(this);
     auth = EndpointAuth(this);
+    book = EndpointBook(this);
+    household = EndpointHousehold(this);
     reminder = EndpointReminder(this);
+    userProfile = EndpointUserProfile(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
 
   late final EndpointAi ai;
 
+  late final EndpointAnalytics analytics;
+
   late final EndpointAuth auth;
 
+  late final EndpointBook book;
+
+  late final EndpointHousehold household;
+
   late final EndpointReminder reminder;
+
+  late final EndpointUserProfile userProfile;
 
   late final EndpointGreeting greeting;
 
@@ -274,8 +420,12 @@ class Client extends _i1.ServerpodClientShared {
   @override
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
     'ai': ai,
+    'analytics': analytics,
     'auth': auth,
+    'book': book,
+    'household': household,
     'reminder': reminder,
+    'userProfile': userProfile,
     'greeting': greeting,
   };
 

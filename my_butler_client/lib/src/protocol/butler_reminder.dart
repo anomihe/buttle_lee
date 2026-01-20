@@ -24,6 +24,7 @@ abstract class ButlerReminder implements _i1.SerializableModel {
     this.snoozedUntil,
     required this.userId,
     bool? isActive,
+    this.assignedToUserId,
   }) : priority = priority ?? _i2.Priority.medium,
        isActive = isActive ?? true;
 
@@ -36,6 +37,7 @@ abstract class ButlerReminder implements _i1.SerializableModel {
     DateTime? snoozedUntil,
     required int userId,
     bool? isActive,
+    int? assignedToUserId,
   }) = _ButlerReminderImpl;
 
   factory ButlerReminder.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -58,6 +60,7 @@ abstract class ButlerReminder implements _i1.SerializableModel {
             ),
       userId: jsonSerialization['userId'] as int,
       isActive: jsonSerialization['isActive'] as bool,
+      assignedToUserId: jsonSerialization['assignedToUserId'] as int?,
     );
   }
 
@@ -80,6 +83,8 @@ abstract class ButlerReminder implements _i1.SerializableModel {
 
   bool isActive;
 
+  int? assignedToUserId;
+
   /// Returns a shallow copy of this [ButlerReminder]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -92,6 +97,7 @@ abstract class ButlerReminder implements _i1.SerializableModel {
     DateTime? snoozedUntil,
     int? userId,
     bool? isActive,
+    int? assignedToUserId,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -105,6 +111,7 @@ abstract class ButlerReminder implements _i1.SerializableModel {
       if (snoozedUntil != null) 'snoozedUntil': snoozedUntil?.toJson(),
       'userId': userId,
       'isActive': isActive,
+      if (assignedToUserId != null) 'assignedToUserId': assignedToUserId,
     };
   }
 
@@ -126,6 +133,7 @@ class _ButlerReminderImpl extends ButlerReminder {
     DateTime? snoozedUntil,
     required int userId,
     bool? isActive,
+    int? assignedToUserId,
   }) : super._(
          id: id,
          description: description,
@@ -135,6 +143,7 @@ class _ButlerReminderImpl extends ButlerReminder {
          snoozedUntil: snoozedUntil,
          userId: userId,
          isActive: isActive,
+         assignedToUserId: assignedToUserId,
        );
 
   /// Returns a shallow copy of this [ButlerReminder]
@@ -150,6 +159,7 @@ class _ButlerReminderImpl extends ButlerReminder {
     Object? snoozedUntil = _Undefined,
     int? userId,
     bool? isActive,
+    Object? assignedToUserId = _Undefined,
   }) {
     return ButlerReminder(
       id: id is int? ? id : this.id,
@@ -162,6 +172,9 @@ class _ButlerReminderImpl extends ButlerReminder {
           : this.snoozedUntil,
       userId: userId ?? this.userId,
       isActive: isActive ?? this.isActive,
+      assignedToUserId: assignedToUserId is int?
+          ? assignedToUserId
+          : this.assignedToUserId,
     );
   }
 }

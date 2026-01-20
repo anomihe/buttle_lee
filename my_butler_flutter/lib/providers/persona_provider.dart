@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 enum PersonaMode { student, worker, personal }
 
@@ -37,14 +38,21 @@ class PersonaProvider with ChangeNotifier {
   }
 
   ThemeData get currentTheme {
+    ThemeData baseTheme;
     switch (_currentMode) {
       case PersonaMode.student:
-        return _isDarkMode ? _studentThemeDark : _studentTheme;
+        baseTheme = _isDarkMode ? _studentThemeDark : _studentTheme;
+        break;
       case PersonaMode.worker:
-        return _isDarkMode ? _workerThemeDark : _workerTheme;
+        baseTheme = _isDarkMode ? _workerThemeDark : _workerTheme;
+        break;
       case PersonaMode.personal:
-        return _isDarkMode ? _personalThemeDark : _personalTheme;
+        baseTheme = _isDarkMode ? _personalThemeDark : _personalTheme;
+        break;
     }
+    return baseTheme.copyWith(
+      textTheme: GoogleFonts.outfitTextTheme(baseTheme.textTheme),
+    );
   }
 
   // Student Theme - Vibrant and energetic (Light)
@@ -137,7 +145,12 @@ class PersonaProvider with ChangeNotifier {
   }
 
   IconData get modeIcon {
-    switch (_currentMode) {
+    return getIconForMode(_currentMode);
+  }
+
+  // Helper methods for UI
+  IconData getIconForMode(PersonaMode mode) {
+    switch (mode) {
       case PersonaMode.student:
         return Icons.school;
       case PersonaMode.worker:
@@ -146,4 +159,19 @@ class PersonaProvider with ChangeNotifier {
         return Icons.home;
     }
   }
+
+  String getNameForMode(PersonaMode mode) {
+    switch (mode) {
+      case PersonaMode.student:
+        return 'Student';
+      case PersonaMode.worker:
+        return 'Worker';
+      case PersonaMode.personal:
+        return 'Personal';
+    }
+  }
+
+  // Alias for compatibility
+  void setPersona(PersonaMode mode) => setMode(mode);
+  PersonaMode get currentPersona => _currentMode;
 }

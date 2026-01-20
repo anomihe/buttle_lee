@@ -1,0 +1,11 @@
+class: HouseholdMember
+table: household_member
+fields:
+  householdId: int
+  userId: int
+  role: String
+  joinedAt: DateTime
+indexes:
+  household_user_idx:
+    fields: householdId, userId
+    unique: true
