@@ -19,13 +19,21 @@ abstract class Household
     required this.name,
     required this.joinCode,
     required this.adminId,
-  });
+    bool? isFocusActive,
+    this.focusEndTime,
+    this.focusMode,
+    this.focusStartedBy,
+  }) : isFocusActive = isFocusActive ?? false;
 
   factory Household({
     int? id,
     required String name,
     required String joinCode,
     required int adminId,
+    bool? isFocusActive,
+    DateTime? focusEndTime,
+    String? focusMode,
+    int? focusStartedBy,
   }) = _HouseholdImpl;
 
   factory Household.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -34,6 +42,14 @@ abstract class Household
       name: jsonSerialization['name'] as String,
       joinCode: jsonSerialization['joinCode'] as String,
       adminId: jsonSerialization['adminId'] as int,
+      isFocusActive: jsonSerialization['isFocusActive'] as bool?,
+      focusEndTime: jsonSerialization['focusEndTime'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(
+              jsonSerialization['focusEndTime'],
+            ),
+      focusMode: jsonSerialization['focusMode'] as String?,
+      focusStartedBy: jsonSerialization['focusStartedBy'] as int?,
     );
   }
 
@@ -50,6 +66,14 @@ abstract class Household
 
   int adminId;
 
+  bool isFocusActive;
+
+  DateTime? focusEndTime;
+
+  String? focusMode;
+
+  int? focusStartedBy;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -61,6 +85,10 @@ abstract class Household
     String? name,
     String? joinCode,
     int? adminId,
+    bool? isFocusActive,
+    DateTime? focusEndTime,
+    String? focusMode,
+    int? focusStartedBy,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -70,6 +98,10 @@ abstract class Household
       'name': name,
       'joinCode': joinCode,
       'adminId': adminId,
+      'isFocusActive': isFocusActive,
+      if (focusEndTime != null) 'focusEndTime': focusEndTime?.toJson(),
+      if (focusMode != null) 'focusMode': focusMode,
+      if (focusStartedBy != null) 'focusStartedBy': focusStartedBy,
     };
   }
 
@@ -81,6 +113,10 @@ abstract class Household
       'name': name,
       'joinCode': joinCode,
       'adminId': adminId,
+      'isFocusActive': isFocusActive,
+      if (focusEndTime != null) 'focusEndTime': focusEndTime?.toJson(),
+      if (focusMode != null) 'focusMode': focusMode,
+      if (focusStartedBy != null) 'focusStartedBy': focusStartedBy,
     };
   }
 
@@ -122,11 +158,19 @@ class _HouseholdImpl extends Household {
     required String name,
     required String joinCode,
     required int adminId,
+    bool? isFocusActive,
+    DateTime? focusEndTime,
+    String? focusMode,
+    int? focusStartedBy,
   }) : super._(
          id: id,
          name: name,
          joinCode: joinCode,
          adminId: adminId,
+         isFocusActive: isFocusActive,
+         focusEndTime: focusEndTime,
+         focusMode: focusMode,
+         focusStartedBy: focusStartedBy,
        );
 
   /// Returns a shallow copy of this [Household]
@@ -138,12 +182,24 @@ class _HouseholdImpl extends Household {
     String? name,
     String? joinCode,
     int? adminId,
+    bool? isFocusActive,
+    Object? focusEndTime = _Undefined,
+    Object? focusMode = _Undefined,
+    Object? focusStartedBy = _Undefined,
   }) {
     return Household(
       id: id is int? ? id : this.id,
       name: name ?? this.name,
       joinCode: joinCode ?? this.joinCode,
       adminId: adminId ?? this.adminId,
+      isFocusActive: isFocusActive ?? this.isFocusActive,
+      focusEndTime: focusEndTime is DateTime?
+          ? focusEndTime
+          : this.focusEndTime,
+      focusMode: focusMode is String? ? focusMode : this.focusMode,
+      focusStartedBy: focusStartedBy is int?
+          ? focusStartedBy
+          : this.focusStartedBy,
     );
   }
 }
@@ -165,6 +221,27 @@ class HouseholdUpdateTable extends _i1.UpdateTable<HouseholdTable> {
     table.adminId,
     value,
   );
+
+  _i1.ColumnValue<bool, bool> isFocusActive(bool value) => _i1.ColumnValue(
+    table.isFocusActive,
+    value,
+  );
+
+  _i1.ColumnValue<DateTime, DateTime> focusEndTime(DateTime? value) =>
+      _i1.ColumnValue(
+        table.focusEndTime,
+        value,
+      );
+
+  _i1.ColumnValue<String, String> focusMode(String? value) => _i1.ColumnValue(
+    table.focusMode,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> focusStartedBy(int? value) => _i1.ColumnValue(
+    table.focusStartedBy,
+    value,
+  );
 }
 
 class HouseholdTable extends _i1.Table<int?> {
@@ -182,6 +259,23 @@ class HouseholdTable extends _i1.Table<int?> {
       'adminId',
       this,
     );
+    isFocusActive = _i1.ColumnBool(
+      'isFocusActive',
+      this,
+      hasDefault: true,
+    );
+    focusEndTime = _i1.ColumnDateTime(
+      'focusEndTime',
+      this,
+    );
+    focusMode = _i1.ColumnString(
+      'focusMode',
+      this,
+    );
+    focusStartedBy = _i1.ColumnInt(
+      'focusStartedBy',
+      this,
+    );
   }
 
   late final HouseholdUpdateTable updateTable;
@@ -192,12 +286,24 @@ class HouseholdTable extends _i1.Table<int?> {
 
   late final _i1.ColumnInt adminId;
 
+  late final _i1.ColumnBool isFocusActive;
+
+  late final _i1.ColumnDateTime focusEndTime;
+
+  late final _i1.ColumnString focusMode;
+
+  late final _i1.ColumnInt focusStartedBy;
+
   @override
   List<_i1.Column> get columns => [
     id,
     name,
     joinCode,
     adminId,
+    isFocusActive,
+    focusEndTime,
+    focusMode,
+    focusStartedBy,
   ];
 }
 

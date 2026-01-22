@@ -27,6 +27,8 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _i14;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i15;
+import 'package:my_butler_server/src/generated/future_calls.dart' as _i16;
+export 'future_calls.dart' show ServerpodFutureCallsGetter;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -385,6 +387,100 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['householdId'],
                   ),
         ),
+        'startFocusSession': _i1.MethodConnector(
+          name: 'startFocusSession',
+          params: {
+            'householdId': _i1.ParameterDescription(
+              name: 'householdId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'durationMinutes': _i1.ParameterDescription(
+              name: 'durationMinutes',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .startFocusSession(
+                    session,
+                    params['householdId'],
+                    params['durationMinutes'],
+                  ),
+        ),
+        'stopFocusSession': _i1.MethodConnector(
+          name: 'stopFocusSession',
+          params: {
+            'householdId': _i1.ParameterDescription(
+              name: 'householdId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .stopFocusSession(
+                    session,
+                    params['householdId'],
+                  ),
+        ),
+        'shareRoutine': _i1.MethodConnector(
+          name: 'shareRoutine',
+          params: {
+            'householdId': _i1.ParameterDescription(
+              name: 'householdId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'name': _i1.ParameterDescription(
+              name: 'name',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'tasks': _i1.ParameterDescription(
+              name: 'tasks',
+              type: _i1.getType<List<String>>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .shareRoutine(
+                    session,
+                    params['householdId'],
+                    params['name'],
+                    params['tasks'],
+                  ),
+        ),
+        'getSharedRoutines': _i1.MethodConnector(
+          name: 'getSharedRoutines',
+          params: {
+            'householdId': _i1.ParameterDescription(
+              name: 'householdId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .getSharedRoutines(
+                    session,
+                    params['householdId'],
+                  ),
+        ),
       },
     );
     connectors['reminder'] = _i1.EndpointConnector(
@@ -619,6 +715,31 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['history'],
                   ),
         ),
+        'updateFocusStats': _i1.MethodConnector(
+          name: 'updateFocusStats',
+          params: {
+            'completed': _i1.ParameterDescription(
+              name: 'completed',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'givenUp': _i1.ParameterDescription(
+              name: 'givenUp',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['userProfile'] as _i8.UserProfileEndpoint)
+                  .updateFocusStats(
+                    session,
+                    params['completed'],
+                    params['givenUp'],
+                  ),
+        ),
       },
     );
     connectors['greeting'] = _i1.EndpointConnector(
@@ -650,5 +771,10 @@ class Endpoints extends _i1.EndpointDispatch {
       ..initializeEndpoints(server);
     modules['serverpod_auth_core'] = _i15.Endpoints()
       ..initializeEndpoints(server);
+  }
+
+  @override
+  _i1.FutureCallDispatch? get futureCalls {
+    return _i16.FutureCalls();
   }
 }

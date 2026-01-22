@@ -15,16 +15,17 @@ import 'dart:async' as _i2;
 import 'package:my_butler_client/src/protocol/user_profile.dart' as _i3;
 import 'package:my_butler_client/src/protocol/book.dart' as _i4;
 import 'package:my_butler_client/src/protocol/household.dart' as _i5;
-import 'package:my_butler_client/src/protocol/butler_reminder.dart' as _i6;
-import 'package:my_butler_client/src/protocol/reminder_type.dart' as _i7;
-import 'package:my_butler_client/src/protocol/priority.dart' as _i8;
-import 'package:my_butler_client/src/protocol/greeting.dart' as _i9;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i10;
+import 'package:my_butler_client/src/protocol/shared_routine.dart' as _i6;
+import 'package:my_butler_client/src/protocol/butler_reminder.dart' as _i7;
+import 'package:my_butler_client/src/protocol/reminder_type.dart' as _i8;
+import 'package:my_butler_client/src/protocol/priority.dart' as _i9;
+import 'package:my_butler_client/src/protocol/greeting.dart' as _i10;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i11;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i11;
-import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i12;
-import 'protocol.dart' as _i13;
+import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+    as _i13;
+import 'protocol.dart' as _i14;
 
 /// Endpoint for AI-powered command processing
 /// {@category Endpoint}
@@ -197,6 +198,46 @@ class EndpointHousehold extends _i1.EndpointRef {
         'deleteHousehold',
         {'householdId': householdId},
       );
+
+  _i2.Future<void> startFocusSession(
+    int householdId,
+    int durationMinutes,
+  ) => caller.callServerEndpoint<void>(
+    'household',
+    'startFocusSession',
+    {
+      'householdId': householdId,
+      'durationMinutes': durationMinutes,
+    },
+  );
+
+  _i2.Future<void> stopFocusSession(int householdId) =>
+      caller.callServerEndpoint<void>(
+        'household',
+        'stopFocusSession',
+        {'householdId': householdId},
+      );
+
+  _i2.Future<void> shareRoutine(
+    int householdId,
+    String name,
+    List<String> tasks,
+  ) => caller.callServerEndpoint<void>(
+    'household',
+    'shareRoutine',
+    {
+      'householdId': householdId,
+      'name': name,
+      'tasks': tasks,
+    },
+  );
+
+  _i2.Future<List<_i6.SharedRoutine>> getSharedRoutines(int householdId) =>
+      caller.callServerEndpoint<List<_i6.SharedRoutine>>(
+        'household',
+        'getSharedRoutines',
+        {'householdId': householdId},
+      );
 }
 
 /// Endpoint for managing reminders
@@ -208,12 +249,12 @@ class EndpointReminder extends _i1.EndpointRef {
   String get name => 'reminder';
 
   /// Create a new reminder and schedule its execution
-  _i2.Future<_i6.ButlerReminder?> createReminder(
+  _i2.Future<_i7.ButlerReminder?> createReminder(
     String description,
     DateTime triggerTime,
-    _i7.ReminderType reminderType, {
-    required _i8.Priority priority,
-  }) => caller.callServerEndpoint<_i6.ButlerReminder?>(
+    _i8.ReminderType reminderType, {
+    required _i9.Priority priority,
+  }) => caller.callServerEndpoint<_i7.ButlerReminder?>(
     'reminder',
     'createReminder',
     {
@@ -225,26 +266,26 @@ class EndpointReminder extends _i1.EndpointRef {
   );
 
   /// Get all reminders for the authenticated user
-  _i2.Future<List<_i6.ButlerReminder>> getUserReminders() =>
-      caller.callServerEndpoint<List<_i6.ButlerReminder>>(
+  _i2.Future<List<_i7.ButlerReminder>> getUserReminders() =>
+      caller.callServerEndpoint<List<_i7.ButlerReminder>>(
         'reminder',
         'getUserReminders',
         {},
       );
 
   /// Get completed (inactive) reminders for the authenticated user
-  _i2.Future<List<_i6.ButlerReminder>> getCompletedReminders() =>
-      caller.callServerEndpoint<List<_i6.ButlerReminder>>(
+  _i2.Future<List<_i7.ButlerReminder>> getCompletedReminders() =>
+      caller.callServerEndpoint<List<_i7.ButlerReminder>>(
         'reminder',
         'getCompletedReminders',
         {},
       );
 
   /// Get upcoming reminders within a time range
-  _i2.Future<List<_i6.ButlerReminder>> getUpcomingReminders(
+  _i2.Future<List<_i7.ButlerReminder>> getUpcomingReminders(
     DateTime startTime,
     DateTime endTime,
-  ) => caller.callServerEndpoint<List<_i6.ButlerReminder>>(
+  ) => caller.callServerEndpoint<List<_i7.ButlerReminder>>(
     'reminder',
     'getUpcomingReminders',
     {
@@ -254,13 +295,13 @@ class EndpointReminder extends _i1.EndpointRef {
   );
 
   /// Update a reminder
-  _i2.Future<_i6.ButlerReminder?> updateReminder(
+  _i2.Future<_i7.ButlerReminder?> updateReminder(
     int reminderId,
     String? description,
     DateTime? triggerTime,
-    _i7.ReminderType? reminderType, {
-    _i8.Priority? priority,
-  }) => caller.callServerEndpoint<_i6.ButlerReminder?>(
+    _i8.ReminderType? reminderType, {
+    _i9.Priority? priority,
+  }) => caller.callServerEndpoint<_i7.ButlerReminder?>(
     'reminder',
     'updateReminder',
     {
@@ -281,10 +322,10 @@ class EndpointReminder extends _i1.EndpointRef {
       );
 
   /// Snooze a reminder to a later time
-  _i2.Future<_i6.ButlerReminder?> snoozeReminder(
+  _i2.Future<_i7.ButlerReminder?> snoozeReminder(
     int reminderId,
     DateTime snoozeUntil,
-  ) => caller.callServerEndpoint<_i6.ButlerReminder?>(
+  ) => caller.callServerEndpoint<_i7.ButlerReminder?>(
     'reminder',
     'snoozeReminder',
     {
@@ -325,6 +366,18 @@ class EndpointUserProfile extends _i1.EndpointRef {
       'history': history,
     },
   );
+
+  _i2.Future<void> updateFocusStats(
+    int completed,
+    int givenUp,
+  ) => caller.callServerEndpoint<void>(
+    'userProfile',
+    'updateFocusStats',
+    {
+      'completed': completed,
+      'givenUp': givenUp,
+    },
+  );
 }
 
 /// This is an example endpoint that returns a greeting message through
@@ -337,8 +390,8 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i9.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i9.Greeting>(
+  _i2.Future<_i10.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i10.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -347,16 +400,16 @@ class EndpointGreeting extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i10.Caller(client);
-    serverpod_auth_idp = _i11.Caller(client);
-    serverpod_auth_core = _i12.Caller(client);
+    auth = _i11.Caller(client);
+    serverpod_auth_idp = _i12.Caller(client);
+    serverpod_auth_core = _i13.Caller(client);
   }
 
-  late final _i10.Caller auth;
+  late final _i11.Caller auth;
 
-  late final _i11.Caller serverpod_auth_idp;
+  late final _i12.Caller serverpod_auth_idp;
 
-  late final _i12.Caller serverpod_auth_core;
+  late final _i13.Caller serverpod_auth_core;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -379,7 +432,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i13.Protocol(),
+         _i14.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,

@@ -18,6 +18,10 @@ household:
   - getMyHouseholds:
   - leaveHousehold:
   - deleteHousehold:
+  - startFocusSession:
+  - stopFocusSession:
+  - shareRoutine:
+  - getSharedRoutines:
 reminder:
   - createReminder:
   - getUserReminders:
@@ -29,5 +33,6 @@ reminder:
 userProfile:
   - getProfile:
   - updateHydration:
+  - updateFocusStats:
 greeting:
   - hello:

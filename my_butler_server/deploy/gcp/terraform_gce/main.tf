@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "google" {
-  credentials = file("credentials.json")
+  # credentials = file("credentials.json")  # Using gcloud auth instead
 
   project = var.project
   region  = var.region
@@ -44,7 +44,7 @@ module "serverpod_production" {
   database_password = var.DATABASE_PASSWORD_PRODUCTION
 
   # Adds Cloud Storage buckets for file uploads.
-  enable_storage = true
+  enable_storage = false
 
   # Adds Redis for caching and communication between servers.
   enable_redis = false

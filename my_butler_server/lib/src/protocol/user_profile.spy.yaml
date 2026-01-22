@@ -12,6 +12,9 @@ fields:
   hydrationDate: String?
   hydrationReminder: bool, default=false
   hydrationHistory: String?
+  focusCompleted: int, default=0
+  focusGivenUp: int, default=0
+
 indexes:
   userInfoId_idx:
     fields: userInfoId

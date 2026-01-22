@@ -4,6 +4,11 @@ fields:
   name: String
   joinCode: String
   adminId: int
+  isFocusActive: bool, default=false
+  focusEndTime: DateTime?
+  focusMode: String?
+  focusStartedBy: int?
+
 indexes:
   joinCode_idx:
     fields: joinCode

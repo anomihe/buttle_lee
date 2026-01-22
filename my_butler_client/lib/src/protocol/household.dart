@@ -18,13 +18,21 @@ abstract class Household implements _i1.SerializableModel {
     required this.name,
     required this.joinCode,
     required this.adminId,
-  });
+    bool? isFocusActive,
+    this.focusEndTime,
+    this.focusMode,
+    this.focusStartedBy,
+  }) : isFocusActive = isFocusActive ?? false;
 
   factory Household({
     int? id,
     required String name,
     required String joinCode,
     required int adminId,
+    bool? isFocusActive,
+    DateTime? focusEndTime,
+    String? focusMode,
+    int? focusStartedBy,
   }) = _HouseholdImpl;
 
   factory Household.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -33,6 +41,14 @@ abstract class Household implements _i1.SerializableModel {
       name: jsonSerialization['name'] as String,
       joinCode: jsonSerialization['joinCode'] as String,
       adminId: jsonSerialization['adminId'] as int,
+      isFocusActive: jsonSerialization['isFocusActive'] as bool?,
+      focusEndTime: jsonSerialization['focusEndTime'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(
+              jsonSerialization['focusEndTime'],
+            ),
+      focusMode: jsonSerialization['focusMode'] as String?,
+      focusStartedBy: jsonSerialization['focusStartedBy'] as int?,
     );
   }
 
@@ -47,6 +63,14 @@ abstract class Household implements _i1.SerializableModel {
 
   int adminId;
 
+  bool isFocusActive;
+
+  DateTime? focusEndTime;
+
+  String? focusMode;
+
+  int? focusStartedBy;
+
   /// Returns a shallow copy of this [Household]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -55,6 +79,10 @@ abstract class Household implements _i1.SerializableModel {
     String? name,
     String? joinCode,
     int? adminId,
+    bool? isFocusActive,
+    DateTime? focusEndTime,
+    String? focusMode,
+    int? focusStartedBy,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -64,6 +92,10 @@ abstract class Household implements _i1.SerializableModel {
       'name': name,
       'joinCode': joinCode,
       'adminId': adminId,
+      'isFocusActive': isFocusActive,
+      if (focusEndTime != null) 'focusEndTime': focusEndTime?.toJson(),
+      if (focusMode != null) 'focusMode': focusMode,
+      if (focusStartedBy != null) 'focusStartedBy': focusStartedBy,
     };
   }
 
@@ -81,11 +113,19 @@ class _HouseholdImpl extends Household {
     required String name,
     required String joinCode,
     required int adminId,
+    bool? isFocusActive,
+    DateTime? focusEndTime,
+    String? focusMode,
+    int? focusStartedBy,
   }) : super._(
          id: id,
          name: name,
          joinCode: joinCode,
          adminId: adminId,
+         isFocusActive: isFocusActive,
+         focusEndTime: focusEndTime,
+         focusMode: focusMode,
+         focusStartedBy: focusStartedBy,
        );
 
   /// Returns a shallow copy of this [Household]
@@ -97,12 +137,24 @@ class _HouseholdImpl extends Household {
     String? name,
     String? joinCode,
     int? adminId,
+    bool? isFocusActive,
+    Object? focusEndTime = _Undefined,
+    Object? focusMode = _Undefined,
+    Object? focusStartedBy = _Undefined,
   }) {
     return Household(
       id: id is int? ? id : this.id,
       name: name ?? this.name,
       joinCode: joinCode ?? this.joinCode,
       adminId: adminId ?? this.adminId,
+      isFocusActive: isFocusActive ?? this.isFocusActive,
+      focusEndTime: focusEndTime is DateTime?
+          ? focusEndTime
+          : this.focusEndTime,
+      focusMode: focusMode is String? ? focusMode : this.focusMode,
+      focusStartedBy: focusStartedBy is int?
+          ? focusStartedBy
+          : this.focusStartedBy,
     );
   }
 }

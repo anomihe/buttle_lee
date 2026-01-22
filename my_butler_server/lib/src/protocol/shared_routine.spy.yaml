@@ -1,0 +1,11 @@
+class: SharedRoutine
+table: shared_routine
+fields:
+  householdId: int
+  createdBy: int
+  name: String
+  tasks: List<String>
+  sharedAt: DateTime
+indexes:
+  household_routine_idx:
+    fields: householdId

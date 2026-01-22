@@ -24,11 +24,13 @@ import 'household.dart' as _i9;
 import 'household_member.dart' as _i10;
 import 'priority.dart' as _i11;
 import 'reminder_type.dart' as _i12;
-import 'user_profile.dart' as _i13;
-import 'package:my_butler_server/src/generated/book.dart' as _i14;
-import 'package:my_butler_server/src/generated/user_profile.dart' as _i15;
-import 'package:my_butler_server/src/generated/household.dart' as _i16;
-import 'package:my_butler_server/src/generated/butler_reminder.dart' as _i17;
+import 'shared_routine.dart' as _i13;
+import 'user_profile.dart' as _i14;
+import 'package:my_butler_server/src/generated/book.dart' as _i15;
+import 'package:my_butler_server/src/generated/user_profile.dart' as _i16;
+import 'package:my_butler_server/src/generated/household.dart' as _i17;
+import 'package:my_butler_server/src/generated/shared_routine.dart' as _i18;
+import 'package:my_butler_server/src/generated/butler_reminder.dart' as _i19;
 export 'book.dart';
 export 'butler_reminder.dart';
 export 'greeting.dart';
@@ -36,6 +38,7 @@ export 'household.dart';
 export 'household_member.dart';
 export 'priority.dart';
 export 'reminder_type.dart';
+export 'shared_routine.dart';
 export 'user_profile.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
@@ -227,6 +230,31 @@ class Protocol extends _i1.SerializationManagerServer {
           isNullable: false,
           dartType: 'int',
         ),
+        _i2.ColumnDefinition(
+          name: 'isFocusActive',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _i2.ColumnDefinition(
+          name: 'focusEndTime',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'focusMode',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'focusStartedBy',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
       ],
       foreignKeys: [],
       indexes: [
@@ -333,6 +361,81 @@ class Protocol extends _i1.SerializationManagerServer {
       managed: true,
     ),
     _i2.TableDefinition(
+      name: 'shared_routine',
+      dartName: 'SharedRoutine',
+      schema: 'public',
+      module: 'my_butler',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'shared_routine_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'householdId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdBy',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'name',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'tasks',
+          columnType: _i2.ColumnType.json,
+          isNullable: false,
+          dartType: 'List<String>',
+        ),
+        _i2.ColumnDefinition(
+          name: 'sharedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'shared_routine_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'household_routine_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'householdId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
       name: 'user_profile',
       dartName: 'UserProfile',
       schema: 'public',
@@ -415,6 +518,20 @@ class Protocol extends _i1.SerializationManagerServer {
           columnType: _i2.ColumnType.text,
           isNullable: true,
           dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'focusCompleted',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _i2.ColumnDefinition(
+          name: 'focusGivenUp',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
         ),
       ],
       foreignKeys: [],
@@ -502,8 +619,11 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i12.ReminderType) {
       return _i12.ReminderType.fromJson(data) as T;
     }
-    if (t == _i13.UserProfile) {
-      return _i13.UserProfile.fromJson(data) as T;
+    if (t == _i13.SharedRoutine) {
+      return _i13.SharedRoutine.fromJson(data) as T;
+    }
+    if (t == _i14.UserProfile) {
+      return _i14.UserProfile.fromJson(data) as T;
     }
     if (t == _i1.getType<_i6.Book?>()) {
       return (data != null ? _i6.Book.fromJson(data) : null) as T;
@@ -526,8 +646,14 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i12.ReminderType?>()) {
       return (data != null ? _i12.ReminderType.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i13.UserProfile?>()) {
-      return (data != null ? _i13.UserProfile.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i13.SharedRoutine?>()) {
+      return (data != null ? _i13.SharedRoutine.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i14.UserProfile?>()) {
+      return (data != null ? _i14.UserProfile.fromJson(data) : null) as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
     if (t == Map<String, int>) {
       return (data as Map).map(
@@ -535,22 +661,31 @@ class Protocol extends _i1.SerializationManagerServer {
           )
           as T;
     }
-    if (t == List<_i14.Book>) {
-      return (data as List).map((e) => deserialize<_i14.Book>(e)).toList() as T;
+    if (t == List<_i15.Book>) {
+      return (data as List).map((e) => deserialize<_i15.Book>(e)).toList() as T;
     }
-    if (t == List<_i15.UserProfile>) {
+    if (t == List<_i16.UserProfile>) {
       return (data as List)
-              .map((e) => deserialize<_i15.UserProfile>(e))
+              .map((e) => deserialize<_i16.UserProfile>(e))
               .toList()
           as T;
     }
-    if (t == List<_i16.Household>) {
-      return (data as List).map((e) => deserialize<_i16.Household>(e)).toList()
+    if (t == List<_i17.Household>) {
+      return (data as List).map((e) => deserialize<_i17.Household>(e)).toList()
           as T;
     }
-    if (t == List<_i17.ButlerReminder>) {
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == List<_i18.SharedRoutine>) {
       return (data as List)
-              .map((e) => deserialize<_i17.ButlerReminder>(e))
+              .map((e) => deserialize<_i18.SharedRoutine>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i19.ButlerReminder>) {
+      return (data as List)
+              .map((e) => deserialize<_i19.ButlerReminder>(e))
               .toList()
           as T;
     }
@@ -578,7 +713,8 @@ class Protocol extends _i1.SerializationManagerServer {
       _i10.HouseholdMember => 'HouseholdMember',
       _i11.Priority => 'Priority',
       _i12.ReminderType => 'ReminderType',
-      _i13.UserProfile => 'UserProfile',
+      _i13.SharedRoutine => 'SharedRoutine',
+      _i14.UserProfile => 'UserProfile',
       _ => null,
     };
   }
@@ -607,7 +743,9 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'Priority';
       case _i12.ReminderType():
         return 'ReminderType';
-      case _i13.UserProfile():
+      case _i13.SharedRoutine():
+        return 'SharedRoutine';
+      case _i14.UserProfile():
         return 'UserProfile';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -656,8 +794,11 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'ReminderType') {
       return deserialize<_i12.ReminderType>(data['data']);
     }
+    if (dataClassName == 'SharedRoutine') {
+      return deserialize<_i13.SharedRoutine>(data['data']);
+    }
     if (dataClassName == 'UserProfile') {
-      return deserialize<_i13.UserProfile>(data['data']);
+      return deserialize<_i14.UserProfile>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -713,8 +854,10 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i9.Household.t;
       case _i10.HouseholdMember:
         return _i10.HouseholdMember.t;
-      case _i13.UserProfile:
-        return _i13.UserProfile.t;
+      case _i13.SharedRoutine:
+        return _i13.SharedRoutine.t;
+      case _i14.UserProfile:
+        return _i14.UserProfile.t;
     }
     return null;
   }
@@ -725,4 +868,25 @@ class Protocol extends _i1.SerializationManagerServer {
 
   @override
   String getModuleName() => 'my_butler';
+
+  /// Maps any `Record`s known to this [Protocol] to their JSON representation
+  ///
+  /// Throws in case the record type is not known.
+  ///
+  /// This method will return `null` (only) for `null` inputs.
+  Map<String, dynamic>? mapRecordToJson(Record? record) {
+    if (record == null) {
+      return null;
+    }
+    try {
+      return _i3.Protocol().mapRecordToJson(record);
+    } catch (_) {}
+    try {
+      return _i4.Protocol().mapRecordToJson(record);
+    } catch (_) {}
+    try {
+      return _i5.Protocol().mapRecordToJson(record);
+    } catch (_) {}
+    throw Exception('Unsupported record type ${record.runtimeType}');
+  }
 }

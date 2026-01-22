@@ -51,16 +51,16 @@ abstract class ButlerReminder
       reminderType: _i3.ReminderType.fromJson(
         (jsonSerialization['reminderType'] as String),
       ),
-      priority: _i2.Priority.fromJson(
-        (jsonSerialization['priority'] as String),
-      ),
+      priority: jsonSerialization['priority'] == null
+          ? null
+          : _i2.Priority.fromJson((jsonSerialization['priority'] as String)),
       snoozedUntil: jsonSerialization['snoozedUntil'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(
               jsonSerialization['snoozedUntil'],
             ),
       userId: jsonSerialization['userId'] as int,
-      isActive: jsonSerialization['isActive'] as bool,
+      isActive: jsonSerialization['isActive'] as bool?,
       assignedToUserId: jsonSerialization['assignedToUserId'] as int?,
     );
   }

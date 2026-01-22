@@ -44,8 +44,17 @@ class GeminiService {
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey',
     );
 
+    final now = DateTime.now();
+    final dateContext = "Today is ${_formatDate(now)}.";
+
     final prompt = '''
-You are a helpful butler assistant. Parse the following command and extract the intent.
+You are Butler Lee, a helpful, intelligent, and chatty AI butler. 
+$dateContext
+Your goal is to assist the user with their daily tasks, reminders, and questions.
+Be conversational and engaging. Don't be too brief; explain your thoughts or offer extra helpful advice. 
+However, if the user explicitly asks to set a reminder or query reminders, you MUST extract that intent accurately.
+
+Parse the following command and extract the intent.
 
 Command: "$command"
 
@@ -53,7 +62,7 @@ Respond with a JSON object containing:
 - "action": one of "create_reminder", "query_reminders", or "general"
 - For create_reminder: "description", "time" (ISO 8601), "type" (daily/weekly/annual/once), "priority" (high/medium/low)
 - For query_reminders: "query_type" (next/all/today)
-- For general: "response" (a helpful text response)
+- For general: "response" (a conversational, helpful text response)
 
 Priority detection rules:
 - "urgent", "important", "critical", "asap" → high
@@ -64,6 +73,7 @@ Examples:
 "Remind me to eat every day at 1 PM" → {"action": "create_reminder", "description": "eat", "time": "13:00", "type": "daily", "priority": "medium"}
 "Urgent reminder to call the doctor at 3 PM" → {"action": "create_reminder", "description": "call the doctor", "time": "15:00", "type": "once", "priority": "high"}
 "When is my next meeting?" → {"action": "query_reminders", "query_type": "next"}
+"What should I do today?" → {"action": "general", "response": "Well, today is ${_formatDate(now)}. It's a great day to focus on your goals! You have a few reminders coming up..."}
 
 Respond ONLY with valid JSON, no other text.
 ''';
@@ -244,5 +254,23 @@ Respond ONLY with valid JSON, no other text.
     final period = time.hour >= 12 ? 'PM' : 'AM';
     final minute = time.minute.toString().padLeft(2, '0');
     return '$hour:$minute $period on ${time.month}/${time.day}/${time.year}';
+  }
+
+  String _formatDate(DateTime date) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 }

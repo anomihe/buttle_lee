@@ -1,0 +1,1 @@
+{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"serverpod_production","Source":"git::https://github.com/serverpod/terraform-google-serverpod-cloud-engine.git?ref=stable-1.1","Dir":".terraform/modules/serverpod_production"}]}

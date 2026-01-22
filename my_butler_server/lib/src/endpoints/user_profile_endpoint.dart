@@ -35,4 +35,19 @@ class UserProfileEndpoint extends Endpoint {
       await UserProfile.db.updateRow(session, profile);
     }
   }
+
+  Future<void> updateFocusStats(
+      Session session, int completed, int givenUp) async {
+    final authInfo = await session.authenticated;
+    if (authInfo == null) return;
+    final userId = authInfo.userId;
+
+    var profile = await UserProfile.db
+        .findFirstRow(session, where: (t) => t.userInfoId.equals(userId));
+    if (profile != null) {
+      profile.focusCompleted = completed;
+      profile.focusGivenUp = givenUp;
+      await UserProfile.db.updateRow(session, profile);
+    }
+  }
 }

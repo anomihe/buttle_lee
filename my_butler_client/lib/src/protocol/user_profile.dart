@@ -26,11 +26,15 @@ abstract class UserProfile implements _i1.SerializableModel {
     this.hydrationDate,
     bool? hydrationReminder,
     this.hydrationHistory,
+    int? focusCompleted,
+    int? focusGivenUp,
   }) : xp = xp ?? 0,
        level = level ?? 1,
        hydrationGoal = hydrationGoal ?? 8,
        hydrationCount = hydrationCount ?? 0,
-       hydrationReminder = hydrationReminder ?? false;
+       hydrationReminder = hydrationReminder ?? false,
+       focusCompleted = focusCompleted ?? 0,
+       focusGivenUp = focusGivenUp ?? 0;
 
   factory UserProfile({
     int? id,
@@ -45,6 +49,8 @@ abstract class UserProfile implements _i1.SerializableModel {
     String? hydrationDate,
     bool? hydrationReminder,
     String? hydrationHistory,
+    int? focusCompleted,
+    int? focusGivenUp,
   }) = _UserProfileImpl;
 
   factory UserProfile.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -54,13 +60,15 @@ abstract class UserProfile implements _i1.SerializableModel {
       email: jsonSerialization['email'] as String,
       profileImageUrl: jsonSerialization['profileImageUrl'] as String?,
       userInfoId: jsonSerialization['userInfoId'] as int,
-      xp: jsonSerialization['xp'] as int,
-      level: jsonSerialization['level'] as int,
-      hydrationGoal: jsonSerialization['hydrationGoal'] as int,
-      hydrationCount: jsonSerialization['hydrationCount'] as int,
+      xp: jsonSerialization['xp'] as int?,
+      level: jsonSerialization['level'] as int?,
+      hydrationGoal: jsonSerialization['hydrationGoal'] as int?,
+      hydrationCount: jsonSerialization['hydrationCount'] as int?,
       hydrationDate: jsonSerialization['hydrationDate'] as String?,
-      hydrationReminder: jsonSerialization['hydrationReminder'] as bool,
+      hydrationReminder: jsonSerialization['hydrationReminder'] as bool?,
       hydrationHistory: jsonSerialization['hydrationHistory'] as String?,
+      focusCompleted: jsonSerialization['focusCompleted'] as int?,
+      focusGivenUp: jsonSerialization['focusGivenUp'] as int?,
     );
   }
 
@@ -91,6 +99,10 @@ abstract class UserProfile implements _i1.SerializableModel {
 
   String? hydrationHistory;
 
+  int focusCompleted;
+
+  int focusGivenUp;
+
   /// Returns a shallow copy of this [UserProfile]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -107,6 +119,8 @@ abstract class UserProfile implements _i1.SerializableModel {
     String? hydrationDate,
     bool? hydrationReminder,
     String? hydrationHistory,
+    int? focusCompleted,
+    int? focusGivenUp,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -124,6 +138,8 @@ abstract class UserProfile implements _i1.SerializableModel {
       if (hydrationDate != null) 'hydrationDate': hydrationDate,
       'hydrationReminder': hydrationReminder,
       if (hydrationHistory != null) 'hydrationHistory': hydrationHistory,
+      'focusCompleted': focusCompleted,
+      'focusGivenUp': focusGivenUp,
     };
   }
 
@@ -149,6 +165,8 @@ class _UserProfileImpl extends UserProfile {
     String? hydrationDate,
     bool? hydrationReminder,
     String? hydrationHistory,
+    int? focusCompleted,
+    int? focusGivenUp,
   }) : super._(
          id: id,
          fullName: fullName,
@@ -162,6 +180,8 @@ class _UserProfileImpl extends UserProfile {
          hydrationDate: hydrationDate,
          hydrationReminder: hydrationReminder,
          hydrationHistory: hydrationHistory,
+         focusCompleted: focusCompleted,
+         focusGivenUp: focusGivenUp,
        );
 
   /// Returns a shallow copy of this [UserProfile]
@@ -181,6 +201,8 @@ class _UserProfileImpl extends UserProfile {
     Object? hydrationDate = _Undefined,
     bool? hydrationReminder,
     Object? hydrationHistory = _Undefined,
+    int? focusCompleted,
+    int? focusGivenUp,
   }) {
     return UserProfile(
       id: id is int? ? id : this.id,
@@ -201,6 +223,8 @@ class _UserProfileImpl extends UserProfile {
       hydrationHistory: hydrationHistory is String?
           ? hydrationHistory
           : this.hydrationHistory,
+      focusCompleted: focusCompleted ?? this.focusCompleted,
+      focusGivenUp: focusGivenUp ?? this.focusGivenUp,
     );
   }
 }

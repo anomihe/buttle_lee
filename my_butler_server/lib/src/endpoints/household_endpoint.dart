@@ -207,4 +207,89 @@ class HouseholdEndpoint extends Endpoint {
     return String.fromCharCodes(Iterable.generate(
         6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
   }
+
+  Future<void> startFocusSession(
+      Session session, int householdId, int durationMinutes) async {
+    final authInfo = await session.authenticated;
+    if (authInfo == null) return;
+    final userId = authInfo.userId;
+
+    final household = await Household.db.findById(session, householdId);
+    if (household == null) return;
+
+    if (household.adminId != userId) {
+      throw Exception('Only admin can start focus session');
+    }
+
+    household.isFocusActive = true;
+    household.focusStartedBy = userId;
+    household.focusEndTime =
+        DateTime.now().add(Duration(minutes: durationMinutes));
+
+    await Household.db.updateRow(session, household);
+  }
+
+  Future<void> stopFocusSession(Session session, int householdId) async {
+    final authInfo = await session.authenticated;
+    if (authInfo == null) return;
+    final userId = authInfo.userId;
+
+    final household = await Household.db.findById(session, householdId);
+    if (household == null) return;
+
+    if (household.adminId != userId) {
+      throw Exception('Only admin can stop focus session');
+    }
+
+    household.isFocusActive = false;
+    household.focusEndTime = null;
+
+    await Household.db.updateRow(session, household);
+  }
+
+  Future<void> shareRoutine(
+      Session session, int householdId, String name, List<String> tasks) async {
+    final authInfo = await session.authenticated;
+    if (authInfo == null) return;
+    final userId = authInfo.userId;
+
+    // Verify membership
+    final member = await HouseholdMember.db.findFirstRow(
+      session,
+      where: (t) => t.householdId.equals(householdId) & t.userId.equals(userId),
+    );
+    if (member == null) throw Exception('Not a member');
+
+    await SharedRoutine.db.insertRow(
+      session,
+      SharedRoutine(
+        householdId: householdId,
+        createdBy: userId,
+        name: name,
+        tasks: tasks,
+        sharedAt: DateTime.now(),
+      ),
+    );
+  }
+
+  Future<List<SharedRoutine>> getSharedRoutines(
+      Session session, int householdId) async {
+    final authInfo = await session.authenticated;
+    if (authInfo == null) return [];
+    final userId = authInfo.userId;
+
+    // Verify membership
+    final member = await HouseholdMember.db.findFirstRow(
+      session,
+      where: (t) => t.householdId.equals(householdId) & t.userId.equals(userId),
+    );
+    if (member == null) return [];
+
+    return await SharedRoutine.db.find(
+      session,
+      where: (t) => t.householdId.equals(householdId),
+      orderBy: (t) => t.sharedAt,
+      orderDescending: true,
+    );
+  }
 }
