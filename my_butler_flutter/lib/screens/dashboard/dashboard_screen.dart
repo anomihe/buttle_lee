@@ -22,12 +22,12 @@ import '../../widgets/morning_briefing_sheet.dart';
 import '../../widgets/level_progress_widget.dart';
 import '../../screens/household_screen.dart';
 import '../../widgets/insights_card.dart';
+import '../../services/routine_service.dart';
 
 import '../../screens/settings_tab.dart';
+import '../../screens/edit_profile_screen.dart';
 import '../../widgets/reading_tracker_sheet.dart';
 import '../../widgets/journal_sheet.dart';
-
-import 'package:google_fonts/google_fonts.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -256,45 +256,66 @@ class _DashboardScreenState extends State<DashboardScreen>
                   title: Row(
                     children: [
                       // Small avatar
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .primary
-                            .withOpacity(0.2),
-                        child: userProfile?.profileImageUrl != null
-                            ? ClipOval(
-                                child: Image.network(
-                                  userProfile!.profileImageUrl!,
-                                  fit: BoxFit.cover,
-                                  width: 36,
-                                  height: 36,
-                                  errorBuilder: (_, __, ___) => Icon(
-                                    Icons.person_rounded,
-                                    size: 18,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const EditProfileScreen()),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(18),
+                        child: CircleAvatar(
+                          radius: 18,
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.2),
+                          child: userProfile?.profileImageUrl != null
+                              ? ClipOval(
+                                  child: Image.network(
+                                    userProfile!.profileImageUrl!,
+                                    fit: BoxFit.cover,
+                                    width: 36,
+                                    height: 36,
+                                    errorBuilder: (_, __, ___) => Icon(
+                                      Icons.person_rounded,
+                                      size: 18,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
                                   ),
+                                )
+                              : Icon(
+                                  Icons.person_rounded,
+                                  size: 18,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
-                              )
-                            : Icon(
-                                Icons.person_rounded,
-                                size: 18,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                        ),
                       ),
                       const SizedBox(width: 12),
                       // Name
                       Expanded(
-                        child: Text(
-                          userProfile?.fullName ?? 'User',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black87,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const EditProfileScreen()),
+                            );
+                          },
+                          child: Text(
+                            userProfile?.fullName ?? 'User',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       // Mode chip
@@ -437,41 +458,53 @@ class _DashboardScreenState extends State<DashboardScreen>
                             child: Row(
                               children: [
                                 // Profile Avatar with ring
-                                Container(
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.white.withOpacity(0.8),
-                                        Colors.white.withOpacity(0.4),
-                                      ],
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const EditProfileScreen()),
+                                    );
+                                  },
+                                  borderRadius: BorderRadius.circular(35),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(3),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.white.withOpacity(0.8),
+                                          Colors.white.withOpacity(0.4),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  child: CircleAvatar(
-                                    radius: 32,
-                                    backgroundColor:
-                                        Colors.white.withOpacity(0.2),
-                                    child: userProfile?.profileImageUrl != null
-                                        ? ClipOval(
-                                            child: Image.network(
-                                              userProfile!.profileImageUrl!,
-                                              fit: BoxFit.cover,
-                                              width: 64,
-                                              height: 64,
-                                              errorBuilder: (_, __, ___) =>
-                                                  const Icon(
-                                                Icons.person_rounded,
-                                                size: 32,
-                                                color: Colors.white,
+                                    child: CircleAvatar(
+                                      radius: 32,
+                                      backgroundColor:
+                                          Colors.white.withOpacity(0.2),
+                                      child: userProfile?.profileImageUrl !=
+                                              null
+                                          ? ClipOval(
+                                              child: Image.network(
+                                                userProfile!.profileImageUrl!,
+                                                fit: BoxFit.cover,
+                                                width: 64,
+                                                height: 64,
+                                                errorBuilder: (_, __, ___) =>
+                                                    const Icon(
+                                                  Icons.person_rounded,
+                                                  size: 32,
+                                                  color: Colors.white,
+                                                ),
                                               ),
+                                            )
+                                          : const Icon(
+                                              Icons.person_rounded,
+                                              size: 32,
+                                              color: Colors.white,
                                             ),
-                                          )
-                                        : const Icon(
-                                            Icons.person_rounded,
-                                            size: 32,
-                                            color: Colors.white,
-                                          ),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -548,7 +581,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 // Omni-Bar
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
                     child: OmniBar(key: _omniBarKey),
                   ),
                 ),
@@ -559,9 +592,17 @@ class _DashboardScreenState extends State<DashboardScreen>
                     padding: const EdgeInsets.only(top: 16),
                     child: SmartChipsWidget(
                       onActionSelected: (command) {
-                        if (command == 'Start my morning routine') {
-                          // 1. Morning Routine
-                          _handleMorningRoutine(context, reminderProvider);
+                        if (command.contains('routine')) {
+                          if (command.contains('morning')) {
+                            _handleRoutine(
+                                context, reminderProvider, RoutineType.morning);
+                          } else if (command.contains('afternoon')) {
+                            _handleRoutine(context, reminderProvider,
+                                RoutineType.afternoon);
+                          } else if (command.contains('evening')) {
+                            _handleRoutine(
+                                context, reminderProvider, RoutineType.evening);
+                          }
                         } else if (command == 'Log water intake') {
                           // 2. Water
                           _handleWaterLog(context);
@@ -914,57 +955,55 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   Widget _buildEmptyState(BuildContext context, bool isDark) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.grey.withOpacity(0.1),
-              shape: BoxShape.circle,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withOpacity(0.05)
+                    : Colors.grey.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.notifications_none_rounded,
+                size: 48,
+                color: isDark ? Colors.white30 : Colors.grey[400],
+              ),
             ),
-            child: Icon(
-              Icons.notifications_none_rounded,
-              size: 48,
-              color: isDark ? Colors.white30 : Colors.grey[400],
+            const SizedBox(height: 20),
+            Text(
+              'No active reminders',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white70 : Colors.black54,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'No active reminders',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: isDark ? Colors.white70 : Colors.black54,
+            const SizedBox(height: 8),
+            Text(
+              'Use the Omni-Bar to create one!',
+              style: TextStyle(
+                fontSize: 14,
+                color: isDark ? Colors.white38 : Colors.grey[500],
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Use the Omni-Bar to create one!',
-            style: TextStyle(
-              fontSize: 14,
-              color: isDark ? Colors.white38 : Colors.grey[500],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  void _handleMorningRoutine(BuildContext context, ReminderProvider provider) {
+  Future<void> _handleRoutine(
+      BuildContext context, ReminderProvider provider, RoutineType type) async {
     final now = DateTime.now();
-    final morningTasks = [
-      'Make the bed 🛏️',
-      'Drink water 💧',
-      'Stretch / Light Exercise 🧘',
-      'Plan the day 🗓️'
-    ];
+    final tasks = await RoutineService().getRoutine(type);
 
-    for (var i = 0; i < morningTasks.length; i++) {
+    for (var i = 0; i < tasks.length; i++) {
       provider.createReminder(
-        description: morningTasks[i],
+        description: tasks[i],
         triggerTime: now.add(Duration(minutes: 5 + (i * 2))),
         reminderType: ReminderType.once,
         priority: Priority.high,
@@ -973,7 +1012,8 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Morning routine added! ☀️'),
+        content: Text(
+            '${type.name[0].toUpperCase()}${type.name.substring(1)} routine added!'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         behavior: SnackBarBehavior.floating,
       ),

@@ -102,11 +102,19 @@ class OmniBarState extends State<OmniBar> with SingleTickerProviderStateMixin {
         onResult: (result) {
           setState(() {
             _controller.text = result.recognizedWords;
-            // Move cursor to end
             _controller.selection = TextSelection.fromPosition(
               TextPosition(offset: _controller.text.length),
             );
           });
+
+          if (result.finalResult) {
+            // Auto-send after a pause
+            Future.delayed(const Duration(seconds: 1), () {
+              if (mounted && _controller.text.isNotEmpty) {
+                _processCommand();
+              }
+            });
+          }
         },
         listenFor: const Duration(seconds: 30),
         pauseFor: const Duration(seconds: 5),

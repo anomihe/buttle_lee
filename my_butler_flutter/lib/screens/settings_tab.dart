@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/persona_provider.dart';
 import '../providers/auth_provider.dart';
 import 'edit_profile_screen.dart';
+import 'routine_settings_screen.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -55,6 +56,41 @@ class _SettingsTabState extends State<SettingsTab> {
               onTap: () => _showHydrationGoalPicker(context, goal),
             );
           },
+        ),
+        // Focus History
+        if (authProvider.userProfile != null)
+          _buildTile(
+            context,
+            icon: Icons.history_rounded,
+            title: 'Focus History',
+            subtitle:
+                '${authProvider.userProfile!.focusCompleted} completed · ${authProvider.userProfile!.focusGivenUp} given up',
+            onTap: null, // Just display for now
+          ),
+        FutureBuilder<int>(
+          future: SharedPreferences.getInstance()
+              .then((prefs) => prefs.getInt('focus_duration_minutes') ?? 25),
+          builder: (context, snapshot) {
+            final duration = snapshot.data ?? 25;
+            return _buildTile(
+              context,
+              icon: Icons.timer_rounded,
+              title: 'Focus Duration',
+              subtitle: '$duration minutes',
+              onTap: () => _showFocusDurationPicker(context, duration),
+            );
+          },
+        ),
+        _buildTile(
+          context,
+          icon: Icons.list_alt_rounded,
+          title: 'Manage Routines',
+          subtitle: 'Morning, Afternoon, Evening',
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const RoutineSettingsScreen(),
+            ),
+          ),
         ),
         const SizedBox(height: 24),
         _buildSectionHeader('Account'),
@@ -172,6 +208,99 @@ class _SettingsTabState extends State<SettingsTab> {
                     ),
                   ),
                   child: Text('Save Goal',
+                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showFocusDurationPicker(
+      BuildContext context, int currentDuration) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    int tempDuration = currentDuration;
+
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E2630) : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Focus Session Length',
+                style: GoogleFonts.outfit(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      if (tempDuration > 5) {
+                        setModalState(() => tempDuration -= 5);
+                      }
+                    },
+                    icon: Icon(Icons.remove_circle_outline_rounded,
+                        color: isDark ? Colors.white70 : Colors.black54),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    '$tempDuration min',
+                    style: GoogleFonts.outfit(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    onPressed: () {
+                      if (tempDuration < 120) {
+                        setModalState(() => tempDuration += 5);
+                      }
+                    },
+                    icon: Icon(Icons.add_circle_outline_rounded,
+                        color: isDark ? Colors.white70 : Colors.black54),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setInt('focus_duration_minutes', tempDuration);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      setState(() {});
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text('Save Duration',
                       style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
                 ),
               ),

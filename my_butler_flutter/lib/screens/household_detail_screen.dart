@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:my_butler_client/my_butler_client.dart';
 import 'package:share_plus/share_plus.dart';
 import '../providers/auth_provider.dart';
+import '../services/routine_service.dart';
 
 class HouseholdDetailScreen extends StatefulWidget {
   final Household household;
@@ -17,44 +18,22 @@ class HouseholdDetailScreen extends StatefulWidget {
 class _HouseholdDetailScreenState extends State<HouseholdDetailScreen> {
   bool _isLoading = true;
   List<UserProfile> _members = [];
+  List<SharedRoutine> _sharedRoutines = [];
+  late Household _household;
 
   @override
   void initState() {
     super.initState();
+    _household = widget.household;
     _loadMembers();
+    _loadSharedRoutines();
   }
 
   Future<void> _loadMembers() async {
     setState(() => _isLoading = true);
     try {
       final client = context.read<AuthProvider>().client;
-      // We need a way to get members for a specification household.
-      // Currently getHouseholdMembers gets for *all* households of user.
-      // We might need to update backend or filter client side.
-      // Backend: getHouseholdMembers() currently fetches *first* household members.
-      // We need to update backend to get members by householdId.
-
-      // Temporary workaround: if we assume getHouseholdMembers logic is updated or we filter locally if possible?
-      // Actually, looking at previous backend code:
-      // getHouseholdMembers finds first household match. This is bad for multi-household.
-
-      // Let's rely on the plan to fix backend for getting members too.
-      // For now, I will use existing constraint but I really should have updated getHouseholdMembers to take an ID.
-      // I will add a TODO or fix backend next. SInce user is blocked, I'll update backend to accept optional ID?
-
-      // The current getHouseholdMembers implementation:
-      /*
-      Future<List<UserProfile>> getHouseholdMembers(Session session) async {
-         ...
-         final memberships = await HouseholdMember.db.find(..., where: (t) => t.userId.equals(userId));
-         final householdId = memberships.first.householdId; // FIRST
-         final householdMembers = await HouseholdMember.db.find(..., where: (t) => t.householdId.equals(householdId));
-         ...
-      }
-      */
-
-      // I MUST update getHouseholdMembers to optionally take a householdId.
-
+      // Ideally should be by householdId, using existing method for now
       final members = await client.household
           .getHouseholdMembers(householdId: widget.household.id);
       _members = members;
@@ -65,19 +44,26 @@ class _HouseholdDetailScreenState extends State<HouseholdDetailScreen> {
     }
   }
 
+  Future<void> _loadSharedRoutines() async {
+    try {
+      final client = context.read<AuthProvider>().client;
+      final routines = await client.household.getSharedRoutines(_household.id!);
+      setState(() => _sharedRoutines = routines);
+    } catch (e) {
+      debugPrint('Error load shared routines: $e');
+    }
+  }
+
   Future<void> _leaveHousehold() async {
     setState(() => _isLoading = true);
     try {
       final client = context.read<AuthProvider>().client;
-      // Needs update to support specific household leave
       final success =
           await client.household.leaveHousehold(widget.household.id!);
-      if (success) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Left household successfully')));
-          Navigator.pop(context, true); // Return true to refresh list
-        }
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Left household successfully')));
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
@@ -95,12 +81,11 @@ class _HouseholdDetailScreenState extends State<HouseholdDetailScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Delete Household?'),
         content: const Text(
-            'Are you sure you want to delete this household? This cannot be undone and all members will be removed.'),
+            'Are you sure? This cannot be undone and all members will be removed.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -115,21 +100,112 @@ class _HouseholdDetailScreenState extends State<HouseholdDetailScreen> {
     setState(() => _isLoading = true);
     try {
       final client = context.read<AuthProvider>().client;
-      // Needs update to support specific household delete
       final success =
           await client.household.deleteHousehold(widget.household.id!);
-      if (success) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Household deleted successfully')));
-          Navigator.pop(context, true);
-        }
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Household deleted successfully')));
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Error: $e')));
       }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _startFocus() async {
+    final duration = await showDialog<int>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Set Focus Duration'),
+        children: [15, 25, 45, 60]
+            .map((e) => SimpleDialogOption(
+                  onPressed: () => Navigator.pop(context, e),
+                  child: Text('$e minutes'),
+                ))
+            .toList(),
+      ),
+    );
+
+    if (duration == null) return;
+
+    setState(() => _isLoading = true);
+    try {
+      final client = context.read<AuthProvider>().client;
+      await client.household.startFocusSession(_household.id!, duration);
+      // Refresh household to get status
+      final households = await client.household.getMyHouseholds();
+      final updated = households.firstWhere((h) => h.id == _household.id);
+      setState(() => _household = updated);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Focus session started for team!')));
+      }
+    } catch (e) {
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _stopFocus() async {
+    setState(() => _isLoading = true);
+    try {
+      final client = context.read<AuthProvider>().client;
+      await client.household.stopFocusSession(_household.id!);
+      // Refresh household
+      final households = await client.household.getMyHouseholds();
+      final updated = households.firstWhere((h) => h.id == _household.id);
+      setState(() => _household = updated);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Focus session ended.')));
+      }
+    } catch (e) {
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _shareRoutine() async {
+    final type = await showDialog<RoutineType>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Share which routine?'),
+        children: RoutineType.values
+            .map((e) => SimpleDialogOption(
+                  onPressed: () => Navigator.pop(context, e),
+                  child: Text(e.name.toUpperCase()),
+                ))
+            .toList(),
+      ),
+    );
+
+    if (type == null) return;
+
+    setState(() => _isLoading = true);
+    try {
+      final tasks = await RoutineService().getRoutine(type);
+      final client = context.read<AuthProvider>().client;
+      await client.household
+          .shareRoutine(_household.id!, '${type.name} Routine', tasks);
+
+      await _loadSharedRoutines();
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Routine shared!')));
+      }
+    } catch (e) {
+      debugPrint('Error sharing routine: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -145,13 +221,15 @@ class _HouseholdDetailScreenState extends State<HouseholdDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final userId = context.read<AuthProvider>().userProfile?.userInfoId;
+    final isAdmin = userId == _household.adminId;
 
     return Container(
       color: _getBackgroundColor(isDark),
       child: Scaffold(
-          backgroundColor: Colors.transparent, // Inherit from parent background
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: Text(widget.household.name,
+            title: Text(_household.name,
                 style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -162,6 +240,73 @@ class _HouseholdDetailScreenState extends State<HouseholdDetailScreen> {
                   padding: const EdgeInsets.all(24),
                   child: Column(
                     children: [
+                      // Community Focus Card
+                      _buildCard(
+                        context,
+                        title: 'Community Focus',
+                        icon: Icons.self_improvement_rounded,
+                        isDark: isDark,
+                        child: Column(
+                          children: [
+                            if (_household.isFocusActive)
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                margin: const EdgeInsets.only(bottom: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.green),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.timer,
+                                        color: Colors.green),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Focus Session Active!',
+                                        style: GoogleFonts.outfit(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.green),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else
+                              const Text('No active focus session.'),
+                            if (isAdmin) ...[
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                child: _household.isFocusActive
+                                    ? OutlinedButton.icon(
+                                        onPressed: _stopFocus,
+                                        icon: const Icon(Icons.stop_circle),
+                                        label: const Text('End Session'),
+                                        style: OutlinedButton.styleFrom(
+                                            foregroundColor: Colors.red),
+                                      )
+                                    : ElevatedButton.icon(
+                                        onPressed: _startFocus,
+                                        icon: const Icon(Icons.play_circle),
+                                        label:
+                                            const Text('Start Community Focus'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                      ),
+                              ),
+                            ]
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Join Code
                       _buildCard(
                         context,
                         title: 'Join Code',
@@ -169,35 +314,13 @@ class _HouseholdDetailScreenState extends State<HouseholdDetailScreen> {
                         isDark: isDark,
                         child: Column(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withOpacity(0.3),
-                                ),
-                              ),
-                              child: Column(
-                                children: [
-                                  SelectableText(
-                                    widget.household.joinCode,
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 2,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                  ),
-                                ],
+                            SelectableText(
+                              _household.joinCode,
+                              style: GoogleFonts.outfit(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 2,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -211,11 +334,8 @@ class _HouseholdDetailScreenState extends State<HouseholdDetailScreen> {
                                   backgroundColor:
                                       Theme.of(context).colorScheme.primary,
                                   foregroundColor: Colors.white,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
+                                      borderRadius: BorderRadius.circular(12)),
                                 ),
                               ),
                             ),
@@ -223,104 +343,146 @@ class _HouseholdDetailScreenState extends State<HouseholdDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      _buildCard(
-                        context,
-                        title: 'Members',
-                        icon: Icons.group_rounded,
-                        isDark: isDark,
-                        child: _members.isEmpty
-                            ? const Text('No members found')
-                            : ListView.separated(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: _members.length,
-                                separatorBuilder: (_, __) => const Divider(),
-                                itemBuilder: (context, index) {
-                                  final member = _members[index];
-                                  return ListTile(
-                                    leading: CircleAvatar(
-                                      backgroundImage:
-                                          member.profileImageUrl != null
-                                              ? NetworkImage(
-                                                  member.profileImageUrl!)
-                                              : null,
-                                      child: member.profileImageUrl == null
-                                          ? Text(member.fullName[0])
-                                          : null,
-                                    ),
-                                    title: Text(member.fullName,
-                                        style: GoogleFonts.outfit(
-                                            color: isDark
-                                                ? Colors.white
-                                                : Colors.black87)),
-                                    subtitle: Text(
-                                      'Level ${member.level ?? 1} • ${member.xp ?? 0} XP',
-                                      style: GoogleFonts.outfit(
-                                          color: isDark
-                                              ? Colors.white70
-                                              : Colors.black54),
-                                    ),
-                                  );
-                                },
-                              ),
-                      ),
+
+                      // Members
+                      _buildMemberSection(isDark),
                       const SizedBox(height: 24),
-                      _buildCard(
-                        context,
-                        title: 'Settings',
-                        icon: Icons.settings_rounded,
-                        isDark: isDark,
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              child: OutlinedButton.icon(
-                                onPressed: _leaveHousehold,
-                                icon: const Icon(Icons.exit_to_app_rounded),
-                                label: const Text('Leave Household'),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.black54,
-                                  side: const BorderSide(color: Colors.grey),
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // Delete Button (Visible only to Admin)
-                            if (widget.household.adminId ==
-                                context
-                                    .read<AuthProvider>()
-                                    .userProfile
-                                    ?.userInfoId) ...[
-                              const SizedBox(height: 12),
-                              SizedBox(
-                                width: double.infinity,
-                                child: OutlinedButton.icon(
-                                  onPressed: _deleteHousehold,
-                                  icon:
-                                      const Icon(Icons.delete_forever_rounded),
-                                  label: const Text('Delete Household'),
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: Colors.red,
-                                    side: const BorderSide(color: Colors.red),
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
+
+                      // Shared Routines
+                      _buildSharedRoutinesSection(isDark),
+                      const SizedBox(height: 24),
+
+                      // Settings
+                      _buildSettingsSection(isDark, isAdmin),
                     ],
                   ),
                 )),
+    );
+  }
+
+  Widget _buildMemberSection(bool isDark) {
+    return _buildCard(
+      context,
+      title: 'Members',
+      icon: Icons.group_rounded,
+      isDark: isDark,
+      child: _members.isEmpty
+          ? const Text('No members found')
+          : ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _members.length,
+              separatorBuilder: (_, __) => const Divider(),
+              itemBuilder: (context, index) {
+                final member = _members[index];
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: member.profileImageUrl != null
+                        ? NetworkImage(member.profileImageUrl!)
+                        : null,
+                    child: member.profileImageUrl == null
+                        ? Text(member.fullName[0])
+                        : null,
+                  ),
+                  title: Text(member.fullName,
+                      style: GoogleFonts.outfit(
+                          color: isDark ? Colors.white : Colors.black87)),
+                  subtitle: Text(
+                    'Level ${member.level ?? 1} • ${member.focusCompleted ?? 0} Sessions',
+                    style: GoogleFonts.outfit(
+                        color: isDark ? Colors.white70 : Colors.black54),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+
+  Widget _buildSharedRoutinesSection(bool isDark) {
+    return _buildCard(
+      context,
+      title: 'Shared Routines',
+      icon: Icons.list_alt,
+      isDark: isDark,
+      child: Column(
+        children: [
+          if (_sharedRoutines.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text('No shared routines yet.'),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _sharedRoutines.length,
+              separatorBuilder: (_, __) => const Divider(),
+              itemBuilder: (context, index) {
+                final routine = _sharedRoutines[index];
+                return ListTile(
+                  title: Text(routine.name,
+                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                  subtitle: Text('${routine.tasks.length} tasks'),
+                  trailing: const Icon(Icons.download_rounded),
+                  onTap: () {
+                    // TODO: Implement "Apply Routine" logic locally
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Routine copied!')));
+                  },
+                );
+              },
+            ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _shareRoutine,
+              icon: const Icon(Icons.add),
+              label: const Text('Share My Routine'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsSection(bool isDark, bool isAdmin) {
+    return _buildCard(
+      context,
+      title: 'Settings',
+      icon: Icons.settings_rounded,
+      isDark: isDark,
+      child: Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _leaveHousehold,
+              icon: const Icon(Icons.exit_to_app_rounded),
+              label: const Text('Leave Household'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.black54,
+                side: const BorderSide(color: Colors.grey),
+              ),
+            ),
+          ),
+          if (isAdmin) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _deleteHousehold,
+                icon: const Icon(Icons.delete_forever_rounded),
+                label: const Text('Delete Household'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.red,
+                  side: const BorderSide(color: Colors.red),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -367,9 +529,9 @@ class _HouseholdDetailScreenState extends State<HouseholdDetailScreen> {
   Color _getBackgroundColor(bool isDark) {
     if (isDark) return const Color(0xFF0D2137);
     final hour = DateTime.now().hour;
-    if (hour >= 5 && hour < 12) return const Color(0xFFE8F5F3); // Morning
-    if (hour >= 12 && hour < 17) return const Color(0xFFFDF7E7); // Afternoon
-    if (hour >= 17 && hour < 20) return const Color(0xFFE6EEF7); // Evening
-    return const Color(0xFFE3E6EA); // Night
+    if (hour >= 5 && hour < 12) return const Color(0xFFE8F5F3);
+    if (hour >= 12 && hour < 17) return const Color(0xFFFDF7E7);
+    if (hour >= 17 && hour < 20) return const Color(0xFFE6EEF7);
+    return const Color(0xFFE3E6EA);
   }
 }

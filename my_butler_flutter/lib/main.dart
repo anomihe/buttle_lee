@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:my_butler_client/my_butler_client.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'providers/auth_provider.dart';
@@ -10,13 +12,41 @@ import 'providers/persona_provider.dart';
 import 'providers/reminder_provider.dart';
 import 'providers/book_provider.dart';
 import 'services/notification_service.dart';
+import 'dart:io';
 
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+// Helper for manual options if file doesn't exist yet
+Future<void> _initFirebase() async {
+  // If user hasn't generated firebase_options.dart, we rely on google-services.json/plist
+  await Firebase.initializeApp();
+}
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Handling a background message: ${message.messageId}");
+}
+
+// TEMPORARY: Bypass SSL verification for testing with IP address
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = MyHttpOverrides(); // Apply SSL bypass
   tz.initializeTimeZones();
+
+  await _initFirebase();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   await NotificationService().init();
   runApp(const MyApp());
 }
@@ -31,8 +61,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(
             client: Client(
-              'http://10.0.2.2:8080/',
+              'http://136.119.184.62:8080/',
               authenticationKeyManager: FlutterAuthenticationKeyManager(),
+              connectionTimeout: const Duration(seconds: 20),
             )..connectivityMonitor = FlutterConnectivityMonitor(),
           ),
         ),

@@ -3,9 +3,12 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  audioplayers_windows
   connectivity_plus
   file_selector_windows
+  firebase_core
   permission_handler_windows
+  screen_brightness_windows
   share_plus
   speech_to_text_windows
   url_launcher_windows

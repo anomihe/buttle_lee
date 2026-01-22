@@ -3,6 +3,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 // Top-level function for background handling
 @pragma('vm:entry-point')
@@ -33,7 +34,7 @@ class NotificationService {
     tz_data.initializeTimeZones();
 
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@mipmap/launcher_icon');
 
     final List<DarwinNotificationCategory> darwinNotificationCategories = [
       DarwinNotificationCategory(
@@ -60,6 +61,9 @@ class NotificationService {
       iOS: initializationSettingsDarwin,
     );
 
+// ... (existing imports)
+
+// ... (inside init method)
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse details) async {
@@ -73,6 +77,56 @@ class NotificationService {
       },
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
+
+    // Initialize Firebase Messaging
+    await _initFirebaseMessaging();
+  }
+
+  Future<void> _initFirebaseMessaging() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+
+      // Get the token
+      try {
+        String? token = await messaging.getToken();
+        print('FCM Token: $token');
+      } catch (e) {
+        print('Failed to get FCM token: $e');
+        // Continue without token - app shouldn't crash
+      }
+
+      // Handle Foreground Messages
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        print('Got a message whilst in the foreground!');
+        print('Message data: ${message.data}');
+
+        if (message.notification != null) {
+          print(
+              'Message also contained a notification: ${message.notification}');
+          // Show local notification
+          scheduleNotification(
+            id: message.hashCode,
+            title: message.notification!.title ?? 'New Notification',
+            body: message.notification!.body ?? '',
+            scheduledTime: DateTime.now(), // Show immediately
+          );
+        }
+      });
+    } else {
+      print('User declined or has not accepted permission');
+    }
   }
 
   Future<void> _handleHydrationAction(bool isYes) async {
@@ -112,7 +166,7 @@ class NotificationService {
         ),
         iOS: DarwinNotificationDetails(),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
@@ -144,7 +198,7 @@ class NotificationService {
           categoryIdentifier: 'hydration_category',
         ),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       payload: 'hydration_check',

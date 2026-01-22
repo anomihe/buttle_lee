@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "224055111742",
+    "project_id": "instagram-clone-anomihe",
+    "storage_bucket": "instagram-clone-anomihe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224055111742:android:4210dd209afbe0fcf9616f",
+        "android_client_info": {
+          "package_name": "com.bulter.bulter_lee"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "224055111742-58q5s8de7h8eggc0ab7bbr7forng4btc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCT7thJUEMdRoN25fsom2-yZeL7FyvZEpI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "224055111742-58q5s8de7h8eggc0ab7bbr7forng4btc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "224055111742-fdniocd2klncv97gggh6sdhgp1j8o32r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.instagramCloneRiverpod"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224055111742:android:cbe0f3bbfd32ecfef9616f",
+        "android_client_info": {
+          "package_name": "com.example.instagram_clone_riverpod"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "224055111742-58q5s8de7h8eggc0ab7bbr7forng4btc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCT7thJUEMdRoN25fsom2-yZeL7FyvZEpI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "224055111742-58q5s8de7h8eggc0ab7bbr7forng4btc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "224055111742-fdniocd2klncv97gggh6sdhgp1j8o32r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.instagramCloneRiverpod"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

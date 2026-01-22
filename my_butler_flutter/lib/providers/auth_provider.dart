@@ -188,4 +188,26 @@ class AuthProvider with ChangeNotifier {
     _userProfile = null;
     notifyListeners();
   }
+
+  /// Update focus stats
+  Future<void> updateFocusStats(int completed, int givenUp) async {
+    try {
+      if (_userProfile != null) {
+        // Update local state immediately for UI responsiveness
+        _userProfile = _userProfile!.copyWith(
+          focusCompleted: (_userProfile!.focusCompleted) + completed,
+          focusGivenUp: (_userProfile!.focusGivenUp) + givenUp,
+        );
+        notifyListeners();
+
+        // Sync with server
+        await client.userProfile.updateFocusStats(
+          _userProfile!.focusCompleted,
+          _userProfile!.focusGivenUp,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error updating focus stats: $e');
+    }
+  }
 }

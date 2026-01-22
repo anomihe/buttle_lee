@@ -23,7 +23,6 @@ class _AiChatWidgetState extends State<AiChatWidget> {
   bool _isProcessing = false;
   late stt.SpeechToText _speech;
   bool _isListening = false;
-  String _listeningText = '';
 
   @override
   void initState() {
@@ -130,24 +129,31 @@ class _AiChatWidgetState extends State<AiChatWidget> {
 
   Future<void> _startListening() async {
     bool available = await _speech.initialize(
-      onError: (error) => debugPrint('Speech recognition error: $error'),
-      onStatus: (status) => debugPrint('Speech recognition status: $status'),
+      onError: (error) {
+        debugPrint('Speech recognition error: $error');
+        setState(() => _isListening = false);
+      },
+      onStatus: (status) {
+        debugPrint('Speech recognition status: $status');
+        if (status == 'notListening') {
+          setState(() => _isListening = false);
+        }
+      },
     );
 
     if (available) {
       setState(() {
         _isListening = true;
-        _listeningText = '';
       });
 
       _speech.listen(
         onResult: (result) {
           setState(() {
-            _listeningText = result.recognizedWords;
-            if (result.finalResult) {
-              _controller.text = _listeningText;
-              _isListening = false;
-            }
+            _controller.text = result.recognizedWords;
+            // Move cursor to end
+            _controller.selection = TextSelection.fromPosition(
+              TextPosition(offset: _controller.text.length),
+            );
           });
         },
         listenFor: const Duration(seconds: 30),
@@ -176,168 +182,168 @@ class _AiChatWidgetState extends State<AiChatWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      child: Column(
-        children: [
-          // Handle bar
-          Container(
-            margin: const EdgeInsets.only(top: 12, bottom: 8),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.psychology,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 28,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'AI Butler Chat',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-          ),
-
-          const Divider(height: 1),
-
-          // Messages list
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                return _ChatBubble(message: message);
-              },
-            ),
-          ),
-
-          // Processing indicator
-          if (_isProcessing)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'AI is thinking...',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                  ),
-                ],
-              ),
-            ),
-
-          const Divider(height: 1),
-
-          // Input area
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: SafeArea(
-              top: false,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        hintText: 'Type your message...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                      ),
-                      maxLines: null,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _sendMessage(),
-                      enabled: !_isProcessing,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Microphone button
-                  if (!_isListening)
-                    IconButton(
-                      icon: const Icon(Icons.mic),
-                      onPressed: _isProcessing ? null : _startListening,
-                      color: Theme.of(context).colorScheme.primary,
-                      tooltip: 'Voice Input',
-                    )
-                  else
-                    IconButton(
-                      icon: const Icon(Icons.mic_off),
-                      onPressed: _stopListening,
-                      color: Colors.red,
-                      tooltip: 'Stop Listening',
-                    ),
-                  const SizedBox(width: 8),
-                  FloatingActionButton(
-                    onPressed: _isProcessing ? null : _sendMessage,
-                    mini: true,
-                    child: const Icon(Icons.send),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Listening indicator
-          if (_isListening)
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            // Handle bar
             Container(
-              padding: const EdgeInsets.all(16),
-              color: Theme.of(context).colorScheme.primaryContainer,
+              margin: const EdgeInsets.only(top: 6, bottom: 2),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // Header
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
               child: Row(
                 children: [
                   Icon(
-                    Icons.mic,
-                    color: Colors.red,
+                    Icons.psychology,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 28,
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      _listeningText.isEmpty ? 'Listening...' : _listeningText,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                    ),
+                  Text(
+                    'AI Butler Chat',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
               ),
             ),
-        ],
+
+            const Divider(height: 1),
+
+            // Messages list
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final message = _messages[index];
+                  final authProvider = context.read<AuthProvider>();
+                  return _ChatBubble(
+                    message: message,
+                    profileImageUrl: authProvider.userProfile?.profileImageUrl,
+                  );
+                },
+              ),
+            ),
+
+            // Processing indicator
+            if (_isProcessing)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'AI is thinking...',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey[600],
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+
+            const Divider(height: 1),
+
+            // Input area
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: SafeArea(
+                top: false,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        onChanged: (_) => setState(
+                            () {}), // Trigger rebuild to show/hide Send button
+                        decoration: InputDecoration(
+                          hintText: _isListening
+                              ? 'Listening...'
+                              : 'Type your message...',
+                          hintStyle: TextStyle(
+                            color: _isListening ? Colors.redAccent : null,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                        ),
+                        maxLines: null,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) => _sendMessage(),
+                        enabled: !_isProcessing,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Microphone button
+                    if (!_isListening)
+                      IconButton(
+                        icon: const Icon(Icons.mic),
+                        onPressed: _isProcessing ? null : _startListening,
+                        color: Theme.of(context).colorScheme.primary,
+                        tooltip: 'Voice Input',
+                      )
+                    else
+                      IconButton(
+                        icon: const Icon(Icons.stop_circle_outlined),
+                        onPressed: _stopListening,
+                        color: Colors.red,
+                        tooltip: 'Stop Listening',
+                      ),
+
+                    // Send button (Always visible)
+                    IconButton(
+                      icon: const Icon(Icons.send),
+                      onPressed:
+                          (_isProcessing || _controller.text.trim().isEmpty)
+                              ? null
+                              : _sendMessage,
+                      color: Theme.of(context).colorScheme.primary,
+                      tooltip: 'Send',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -345,8 +351,12 @@ class _AiChatWidgetState extends State<AiChatWidget> {
 
 class _ChatBubble extends StatelessWidget {
   final ChatMessage message;
+  final String? profileImageUrl;
 
-  const _ChatBubble({required this.message});
+  const _ChatBubble({
+    required this.message,
+    this.profileImageUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -414,11 +424,25 @@ class _ChatBubble extends StatelessWidget {
             CircleAvatar(
               radius: 16,
               backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-              child: Icon(
-                Icons.person,
-                size: 18,
-                color: Theme.of(context).colorScheme.secondary,
-              ),
+              child: profileImageUrl != null
+                  ? ClipOval(
+                      child: Image.network(
+                        profileImageUrl!,
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.person,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                      ),
+                    )
+                  : Icon(
+                      Icons.person,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
             ),
           ],
         ],

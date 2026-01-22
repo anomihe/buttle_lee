@@ -88,18 +88,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  // Consistent background logic
+  Color _getBackgroundColor(bool isDark) {
+    if (isDark) return const Color(0xFF0D2137);
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 11)
+      return const Color(0xFFE8F5F3);
+    else if (hour >= 11 && hour < 16)
+      return const Color(0xFFF5F9F8);
+    else if (hour >= 16 && hour < 20)
+      return const Color(0xFFF3E5F5);
+    else
+      return const Color(0xFF1A237E);
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().userProfile;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: _getBackgroundColor(isDark),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
+          icon: Icon(Icons.arrow_back_rounded,
               color: isDark ? Colors.white : Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
@@ -168,7 +182,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           color: Theme.of(context).colorScheme.primary,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: Theme.of(context).scaffoldBackgroundColor,
+                            color: _getBackgroundColor(isDark),
                             width: 4,
                           ),
                         ),
@@ -192,7 +206,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 filled: true,
                 fillColor: isDark
                     ? Colors.white.withOpacity(0.05)
-                    : Colors.grey.withOpacity(0.1),
+                    : Colors.white.withOpacity(0.5), // Lighter in light mode
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -203,7 +217,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 16),
             // Email is usually read-only or handled separately
             TextField(
-              controller: TextEditingController(text: 'user@example.com'),
+              controller: TextEditingController(text: user?.email ?? ''),
               readOnly: true,
               enabled: false,
               decoration: InputDecoration(
@@ -212,7 +226,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 filled: true,
                 fillColor: isDark
                     ? Colors.white.withOpacity(0.02)
-                    : Colors.grey.withOpacity(0.05),
+                    : Colors.white.withOpacity(0.3),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,

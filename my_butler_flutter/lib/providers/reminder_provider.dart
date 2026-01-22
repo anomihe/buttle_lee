@@ -202,6 +202,28 @@ class ReminderProvider with ChangeNotifier {
     }
   }
 
+  /// Cancel all local notifications and reschedule active future reminders
+  Future<void> rescheduleAllReminders() async {
+    await NotificationService().cancelAll();
+
+    // Ensure we have the latest list
+    if (_reminders.isEmpty) {
+      await loadReminders();
+    }
+
+    final now = DateTime.now();
+    for (var reminder in _reminders) {
+      if (reminder.triggerTime.isAfter(now) && reminder.isActive) {
+        NotificationService().scheduleNotification(
+          id: reminder.id!,
+          title: 'Butler Reminder',
+          body: reminder.description,
+          scheduledTime: reminder.triggerTime,
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
     // Clean up streaming connection if needed

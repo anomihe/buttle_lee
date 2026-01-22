@@ -12,11 +12,28 @@ class SmartChipsWidget extends StatelessWidget {
     this.onFocusSelected,
   });
 
-  final List<(String label, String icon, String command)> _actions = const [
-    ('Morning', '☀️', 'Start my morning routine'),
-    ('Focus', '🎯', 'Focus for 25 minutes'),
-    ('Water', '💧', 'Log water intake'),
-  ];
+  List<(String label, String icon, String command)> get _actions {
+    final hour = DateTime.now().hour;
+    var routineLabel = 'Morning';
+    var routineIcon = '☀️';
+    var routineCommand = 'Start my morning routine';
+
+    if (hour >= 12 && hour < 17) {
+      routineLabel = 'Afternoon';
+      routineIcon = '🌤️';
+      routineCommand = 'Start my afternoon routine';
+    } else if (hour >= 17) {
+      routineLabel = 'Evening';
+      routineIcon = '🌙';
+      routineCommand = 'Start my evening routine';
+    }
+
+    return [
+      (routineLabel, routineIcon, routineCommand),
+      ('Focus', '🎯', 'Focus for 25 minutes'),
+      ('Water', '💧', 'Log water intake'),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
