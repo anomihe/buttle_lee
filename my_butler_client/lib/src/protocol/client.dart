@@ -378,6 +378,13 @@ class EndpointUserProfile extends _i1.EndpointRef {
       'givenUp': givenUp,
     },
   );
+
+  /// Increment user XP by a specified amount
+  _i2.Future<void> incrementXp(int amount) => caller.callServerEndpoint<void>(
+    'userProfile',
+    'incrementXp',
+    {'amount': amount},
+  );
 }
 
 /// This is an example endpoint that returns a greeting message through

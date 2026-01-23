@@ -178,16 +178,30 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
 
   Future<void> addWater() async {
     final prefs = await SharedPreferences.getInstance();
+    final wasAtGoal = _glasses >= _goal;
     setState(() => _glasses++);
 
     // Check for goal completion (celebration)
-    if (_glasses == _goal) {
+    if (_glasses == _goal && !wasAtGoal) {
       _confettiController.play();
+
+      // Award XP for completing daily hydration goal
+      try {
+        final client = context.read<AuthProvider>().client;
+        await client.userProfile.incrementXp(10); // 10 XP for hydration goal
+
+        // Reload user profile to update XP bar
+        final authProvider = context.read<AuthProvider>();
+        await authProvider.loadUserProfile();
+      } catch (e) {
+        debugPrint('Failed to increment XP: $e');
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-                'Daily Goal Reached! Great job! 🎉'), // Added unicode safety
+            content:
+                Text('Daily Goal Reached! +10 XP 🎉'), // Added unicode safety
             backgroundColor: Colors.green,
           ),
         );

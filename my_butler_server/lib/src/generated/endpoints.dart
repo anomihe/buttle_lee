@@ -740,6 +740,25 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['givenUp'],
                   ),
         ),
+        'incrementXp': _i1.MethodConnector(
+          name: 'incrementXp',
+          params: {
+            'amount': _i1.ParameterDescription(
+              name: 'amount',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['userProfile'] as _i8.UserProfileEndpoint)
+                  .incrementXp(
+                    session,
+                    params['amount'],
+                  ),
+        ),
       },
     );
     connectors['greeting'] = _i1.EndpointConnector(

@@ -34,5 +34,6 @@ userProfile:
   - getProfile:
   - updateHydration:
   - updateFocusStats:
+  - incrementXp:
 greeting:
   - hello:

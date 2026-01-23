@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:my_butler_client/my_butler_client.dart';
+import '../services/notification_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final Client client;
@@ -136,6 +137,13 @@ class AuthProvider with ChangeNotifier {
 
         _isAuthenticated = true;
         await loadUserProfile();
+
+        // Subscribe to user-specific FCM topic for notifications
+        if (_userProfile != null) {
+          await NotificationService()
+              .subscribeToTopic('user_${_userProfile!.userInfoId}');
+        }
+
         notifyListeners();
         return null; // Success
       } else {

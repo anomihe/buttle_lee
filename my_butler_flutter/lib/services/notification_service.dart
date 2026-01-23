@@ -129,6 +129,26 @@ class NotificationService {
     }
   }
 
+  /// Subscribe to user-specific topic for FCM notifications
+  Future<void> subscribeToTopic(String topic) async {
+    try {
+      await FirebaseMessaging.instance.subscribeToTopic(topic);
+      print('Subscribed to topic: $topic');
+    } catch (e) {
+      print('Failed to subscribe to topic $topic: $e');
+    }
+  }
+
+  /// Unsubscribe from a topic
+  Future<void> unsubscribeFromTopic(String topic) async {
+    try {
+      await FirebaseMessaging.instance.unsubscribeFromTopic(topic);
+      print('Unsubscribed from topic: $topic');
+    } catch (e) {
+      print('Failed to unsubscribe from topic $topic: $e');
+    }
+  }
+
   Future<void> _handleHydrationAction(bool isYes) async {
     // This runs in foreground typically when app opens
     if (isYes) {

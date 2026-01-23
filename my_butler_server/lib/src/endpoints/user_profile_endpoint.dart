@@ -50,4 +50,18 @@ class UserProfileEndpoint extends Endpoint {
       await UserProfile.db.updateRow(session, profile);
     }
   }
+
+  /// Increment user XP by a specified amount
+  Future<void> incrementXp(Session session, int amount) async {
+    final authInfo = await session.authenticated;
+    if (authInfo == null) return;
+    final userId = authInfo.userId;
+
+    var profile = await UserProfile.db
+        .findFirstRow(session, where: (t) => t.userInfoId.equals(userId));
+    if (profile != null) {
+      profile.xp = profile.xp + amount;
+      await UserProfile.db.updateRow(session, profile);
+    }
+  }
 }
