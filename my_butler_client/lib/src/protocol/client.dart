@@ -335,58 +335,6 @@ class EndpointReminder extends _i1.EndpointRef {
   );
 }
 
-/// {@category Endpoint}
-class EndpointUserProfile extends _i1.EndpointRef {
-  EndpointUserProfile(_i1.EndpointCaller caller) : super(caller);
-
-  @override
-  String get name => 'userProfile';
-
-  _i2.Future<_i3.UserProfile?> getProfile() =>
-      caller.callServerEndpoint<_i3.UserProfile?>(
-        'userProfile',
-        'getProfile',
-        {},
-      );
-
-  _i2.Future<void> updateHydration(
-    int goal,
-    int count,
-    String? date,
-    bool reminder,
-    String? history,
-  ) => caller.callServerEndpoint<void>(
-    'userProfile',
-    'updateHydration',
-    {
-      'goal': goal,
-      'count': count,
-      'date': date,
-      'reminder': reminder,
-      'history': history,
-    },
-  );
-
-  _i2.Future<void> updateFocusStats(
-    int completed,
-    int givenUp,
-  ) => caller.callServerEndpoint<void>(
-    'userProfile',
-    'updateFocusStats',
-    {
-      'completed': completed,
-      'givenUp': givenUp,
-    },
-  );
-
-  /// Increment user XP by a specified amount
-  _i2.Future<void> incrementXp(int amount) => caller.callServerEndpoint<void>(
-    'userProfile',
-    'incrementXp',
-    {'amount': amount},
-  );
-}
-
 /// This is an example endpoint that returns a greeting message through
 /// its [hello] method.
 /// {@category Endpoint}
@@ -454,7 +402,6 @@ class Client extends _i1.ServerpodClientShared {
     book = EndpointBook(this);
     household = EndpointHousehold(this);
     reminder = EndpointReminder(this);
-    userProfile = EndpointUserProfile(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
@@ -471,8 +418,6 @@ class Client extends _i1.ServerpodClientShared {
 
   late final EndpointReminder reminder;
 
-  late final EndpointUserProfile userProfile;
-
   late final EndpointGreeting greeting;
 
   late final Modules modules;
@@ -485,7 +430,6 @@ class Client extends _i1.ServerpodClientShared {
     'book': book,
     'household': household,
     'reminder': reminder,
-    'userProfile': userProfile,
     'greeting': greeting,
   };
 

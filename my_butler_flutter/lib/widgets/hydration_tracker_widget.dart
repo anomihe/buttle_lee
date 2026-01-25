@@ -25,6 +25,7 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
   int _goal = 8;
   bool _isLoading = true;
   bool _reminderEnabled = false;
+  int _interval = 60; // Default 60 minutes
   late ConfettiController _confettiController;
 
   @override
@@ -70,6 +71,9 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
         await prefs.setInt('hydration_goal', profile.hydrationGoal ?? 8);
         await prefs.setBool(
             'hydration_reminder', profile.hydrationReminder ?? false);
+        await prefs.setInt(
+            'hydration_interval', profile.hydrationInterval ?? 60);
+
         if (profile.hydrationDate != null) {
           await prefs.setString('hydration_date', profile.hydrationDate!);
         }
@@ -85,6 +89,7 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
     final lastDate = prefs.getString('hydration_date');
     final savedGoal = prefs.getInt('hydration_goal') ?? 8;
     final reminder = prefs.getBool('hydration_reminder') ?? false;
+    final interval = prefs.getInt('hydration_interval') ?? 60;
 
     if (lastDate != today) {
       if (mounted) {
@@ -92,6 +97,7 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
           _glasses = 0;
           _goal = savedGoal;
           _reminderEnabled = reminder;
+          _interval = interval;
           _isLoading = false;
         });
       }
@@ -104,6 +110,7 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
           _glasses = prefs.getInt('hydration_count') ?? 0;
           _goal = savedGoal;
           _reminderEnabled = reminder;
+          _interval = interval;
           _isLoading = false;
         });
       }
@@ -111,9 +118,8 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
 
     // Ensure reminder is scheduled if enabled (e.g. on new device)
     if (_reminderEnabled) {
-      await NotificationService().scheduleHydrationReminder(
-        DateTime.now().add(const Duration(hours: 1)),
-      );
+      // We don't reschedule here to avoid spamming on reload,
+      // relying on the toggle/initial logic or background handler
     }
   }
 
@@ -128,6 +134,7 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
         prefs.getString('hydration_date'),
         _reminderEnabled,
         prefs.getString('hydration_history'),
+        _interval,
       );
     } catch (e) {
       debugPrint('Failed to sync hydration to cloud: $e');
@@ -140,12 +147,15 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
     await prefs.setBool('hydration_reminder', _reminderEnabled);
 
     if (_reminderEnabled) {
+      // Schedule immediate next reminder
       await NotificationService().scheduleHydrationReminder(
-        DateTime.now().add(const Duration(hours: 1)),
+        DateTime.now().add(Duration(minutes: _interval)),
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Hydration reminders enabled (Hourly)')),
+          SnackBar(
+              content: Text(
+                  'Hydration reminders enabled (Every ${_formatInterval(_interval)})')),
         );
       }
     } else {
@@ -294,6 +304,36 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
                   ),
                   Row(
                     children: [
+                      if (_reminderEnabled)
+                        GestureDetector(
+                          onTap: _showIntervalPicker,
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                  color: Colors.blue.withOpacity(0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.timer_outlined,
+                                    size: 14, color: Colors.blue),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _formatInterval(_interval),
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       IconButton(
                         icon: Icon(
                           _reminderEnabled
@@ -443,6 +483,90 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
                 ? Colors.white
                 : (isDark ? Colors.white : Colors.black87),
             size: 24,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatInterval(int minutes) {
+    if (minutes >= 60) {
+      final hours = minutes / 60;
+      return '${hours.toStringAsFixed(hours.truncateToDouble() == hours ? 0 : 1)}h';
+    }
+    return '${minutes}m';
+  }
+
+  void _showIntervalPicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Reminder Interval',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildIntervalOption(30),
+                _buildIntervalOption(60),
+                _buildIntervalOption(90),
+                _buildIntervalOption(120),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIntervalOption(int minutes) {
+    final isSelected = _interval == minutes;
+    return InkWell(
+      onTap: () async {
+        setState(() => _interval = minutes);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('hydration_interval', _interval);
+
+        // Reschedule
+        await NotificationService().cancelNotification(888);
+        await NotificationService().scheduleHydrationReminder(
+          DateTime.now().add(Duration(minutes: _interval)),
+        );
+
+        _syncToCloud();
+        if (mounted) Navigator.pop(context);
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          _formatInterval(minutes),
+          style: TextStyle(
+            color: isSelected
+                ? Theme.of(context).colorScheme.onPrimary
+                : Theme.of(context).colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),

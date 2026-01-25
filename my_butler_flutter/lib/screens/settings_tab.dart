@@ -85,7 +85,7 @@ class _SettingsTabState extends State<SettingsTab> {
           context,
           icon: Icons.list_alt_rounded,
           title: 'Manage Routines',
-          subtitle: 'Morning, Afternoon, Evening',
+          subtitle: 'Journal, Reading, Focus Mode',
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const RoutineSettingsScreen(),

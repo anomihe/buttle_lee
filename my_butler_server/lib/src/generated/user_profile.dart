@@ -26,16 +26,27 @@ abstract class UserProfile
     int? hydrationCount,
     this.hydrationDate,
     bool? hydrationReminder,
-    this.hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
+    int? hydrationInterval,
+    bool? journalReminder,
+    int? journalInterval,
+    bool? bookReminder,
+    int? bookInterval,
+    int? focusModeDuration,
   }) : xp = xp ?? 0,
        level = level ?? 1,
        hydrationGoal = hydrationGoal ?? 8,
        hydrationCount = hydrationCount ?? 0,
        hydrationReminder = hydrationReminder ?? false,
        focusCompleted = focusCompleted ?? 0,
-       focusGivenUp = focusGivenUp ?? 0;
+       focusGivenUp = focusGivenUp ?? 0,
+       hydrationInterval = hydrationInterval ?? 60,
+       journalReminder = journalReminder ?? false,
+       journalInterval = journalInterval ?? 24,
+       bookReminder = bookReminder ?? false,
+       bookInterval = bookInterval ?? 24,
+       focusModeDuration = focusModeDuration ?? 25;
 
   factory UserProfile({
     int? id,
@@ -49,9 +60,14 @@ abstract class UserProfile
     int? hydrationCount,
     String? hydrationDate,
     bool? hydrationReminder,
-    String? hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
+    int? hydrationInterval,
+    bool? journalReminder,
+    int? journalInterval,
+    bool? bookReminder,
+    int? bookInterval,
+    int? focusModeDuration,
   }) = _UserProfileImpl;
 
   factory UserProfile.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -67,9 +83,14 @@ abstract class UserProfile
       hydrationCount: jsonSerialization['hydrationCount'] as int?,
       hydrationDate: jsonSerialization['hydrationDate'] as String?,
       hydrationReminder: jsonSerialization['hydrationReminder'] as bool?,
-      hydrationHistory: jsonSerialization['hydrationHistory'] as String?,
       focusCompleted: jsonSerialization['focusCompleted'] as int?,
       focusGivenUp: jsonSerialization['focusGivenUp'] as int?,
+      hydrationInterval: jsonSerialization['hydrationInterval'] as int?,
+      journalReminder: jsonSerialization['journalReminder'] as bool?,
+      journalInterval: jsonSerialization['journalInterval'] as int?,
+      bookReminder: jsonSerialization['bookReminder'] as bool?,
+      bookInterval: jsonSerialization['bookInterval'] as int?,
+      focusModeDuration: jsonSerialization['focusModeDuration'] as int?,
     );
   }
 
@@ -100,11 +121,21 @@ abstract class UserProfile
 
   bool hydrationReminder;
 
-  String? hydrationHistory;
-
   int focusCompleted;
 
   int focusGivenUp;
+
+  int hydrationInterval;
+
+  bool journalReminder;
+
+  int journalInterval;
+
+  bool bookReminder;
+
+  int bookInterval;
+
+  int focusModeDuration;
 
   @override
   _i1.Table<int?> get table => t;
@@ -124,9 +155,14 @@ abstract class UserProfile
     int? hydrationCount,
     String? hydrationDate,
     bool? hydrationReminder,
-    String? hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
+    int? hydrationInterval,
+    bool? journalReminder,
+    int? journalInterval,
+    bool? bookReminder,
+    int? bookInterval,
+    int? focusModeDuration,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -143,9 +179,14 @@ abstract class UserProfile
       'hydrationCount': hydrationCount,
       if (hydrationDate != null) 'hydrationDate': hydrationDate,
       'hydrationReminder': hydrationReminder,
-      if (hydrationHistory != null) 'hydrationHistory': hydrationHistory,
       'focusCompleted': focusCompleted,
       'focusGivenUp': focusGivenUp,
+      'hydrationInterval': hydrationInterval,
+      'journalReminder': journalReminder,
+      'journalInterval': journalInterval,
+      'bookReminder': bookReminder,
+      'bookInterval': bookInterval,
+      'focusModeDuration': focusModeDuration,
     };
   }
 
@@ -164,9 +205,14 @@ abstract class UserProfile
       'hydrationCount': hydrationCount,
       if (hydrationDate != null) 'hydrationDate': hydrationDate,
       'hydrationReminder': hydrationReminder,
-      if (hydrationHistory != null) 'hydrationHistory': hydrationHistory,
       'focusCompleted': focusCompleted,
       'focusGivenUp': focusGivenUp,
+      'hydrationInterval': hydrationInterval,
+      'journalReminder': journalReminder,
+      'journalInterval': journalInterval,
+      'bookReminder': bookReminder,
+      'bookInterval': bookInterval,
+      'focusModeDuration': focusModeDuration,
     };
   }
 
@@ -215,9 +261,14 @@ class _UserProfileImpl extends UserProfile {
     int? hydrationCount,
     String? hydrationDate,
     bool? hydrationReminder,
-    String? hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
+    int? hydrationInterval,
+    bool? journalReminder,
+    int? journalInterval,
+    bool? bookReminder,
+    int? bookInterval,
+    int? focusModeDuration,
   }) : super._(
          id: id,
          fullName: fullName,
@@ -230,9 +281,14 @@ class _UserProfileImpl extends UserProfile {
          hydrationCount: hydrationCount,
          hydrationDate: hydrationDate,
          hydrationReminder: hydrationReminder,
-         hydrationHistory: hydrationHistory,
          focusCompleted: focusCompleted,
          focusGivenUp: focusGivenUp,
+         hydrationInterval: hydrationInterval,
+         journalReminder: journalReminder,
+         journalInterval: journalInterval,
+         bookReminder: bookReminder,
+         bookInterval: bookInterval,
+         focusModeDuration: focusModeDuration,
        );
 
   /// Returns a shallow copy of this [UserProfile]
@@ -251,9 +307,14 @@ class _UserProfileImpl extends UserProfile {
     int? hydrationCount,
     Object? hydrationDate = _Undefined,
     bool? hydrationReminder,
-    Object? hydrationHistory = _Undefined,
     int? focusCompleted,
     int? focusGivenUp,
+    int? hydrationInterval,
+    bool? journalReminder,
+    int? journalInterval,
+    bool? bookReminder,
+    int? bookInterval,
+    int? focusModeDuration,
   }) {
     return UserProfile(
       id: id is int? ? id : this.id,
@@ -271,11 +332,14 @@ class _UserProfileImpl extends UserProfile {
           ? hydrationDate
           : this.hydrationDate,
       hydrationReminder: hydrationReminder ?? this.hydrationReminder,
-      hydrationHistory: hydrationHistory is String?
-          ? hydrationHistory
-          : this.hydrationHistory,
       focusCompleted: focusCompleted ?? this.focusCompleted,
       focusGivenUp: focusGivenUp ?? this.focusGivenUp,
+      hydrationInterval: hydrationInterval ?? this.hydrationInterval,
+      journalReminder: journalReminder ?? this.journalReminder,
+      journalInterval: journalInterval ?? this.journalInterval,
+      bookReminder: bookReminder ?? this.bookReminder,
+      bookInterval: bookInterval ?? this.bookInterval,
+      focusModeDuration: focusModeDuration ?? this.focusModeDuration,
     );
   }
 }
@@ -335,12 +399,6 @@ class UserProfileUpdateTable extends _i1.UpdateTable<UserProfileTable> {
     value,
   );
 
-  _i1.ColumnValue<String, String> hydrationHistory(String? value) =>
-      _i1.ColumnValue(
-        table.hydrationHistory,
-        value,
-      );
-
   _i1.ColumnValue<int, int> focusCompleted(int value) => _i1.ColumnValue(
     table.focusCompleted,
     value,
@@ -348,6 +406,36 @@ class UserProfileUpdateTable extends _i1.UpdateTable<UserProfileTable> {
 
   _i1.ColumnValue<int, int> focusGivenUp(int value) => _i1.ColumnValue(
     table.focusGivenUp,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> hydrationInterval(int value) => _i1.ColumnValue(
+    table.hydrationInterval,
+    value,
+  );
+
+  _i1.ColumnValue<bool, bool> journalReminder(bool value) => _i1.ColumnValue(
+    table.journalReminder,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> journalInterval(int value) => _i1.ColumnValue(
+    table.journalInterval,
+    value,
+  );
+
+  _i1.ColumnValue<bool, bool> bookReminder(bool value) => _i1.ColumnValue(
+    table.bookReminder,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> bookInterval(int value) => _i1.ColumnValue(
+    table.bookInterval,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> focusModeDuration(int value) => _i1.ColumnValue(
+    table.focusModeDuration,
     value,
   );
 }
@@ -400,10 +488,6 @@ class UserProfileTable extends _i1.Table<int?> {
       this,
       hasDefault: true,
     );
-    hydrationHistory = _i1.ColumnString(
-      'hydrationHistory',
-      this,
-    );
     focusCompleted = _i1.ColumnInt(
       'focusCompleted',
       this,
@@ -411,6 +495,36 @@ class UserProfileTable extends _i1.Table<int?> {
     );
     focusGivenUp = _i1.ColumnInt(
       'focusGivenUp',
+      this,
+      hasDefault: true,
+    );
+    hydrationInterval = _i1.ColumnInt(
+      'hydrationInterval',
+      this,
+      hasDefault: true,
+    );
+    journalReminder = _i1.ColumnBool(
+      'journalReminder',
+      this,
+      hasDefault: true,
+    );
+    journalInterval = _i1.ColumnInt(
+      'journalInterval',
+      this,
+      hasDefault: true,
+    );
+    bookReminder = _i1.ColumnBool(
+      'bookReminder',
+      this,
+      hasDefault: true,
+    );
+    bookInterval = _i1.ColumnInt(
+      'bookInterval',
+      this,
+      hasDefault: true,
+    );
+    focusModeDuration = _i1.ColumnInt(
+      'focusModeDuration',
       this,
       hasDefault: true,
     );
@@ -438,11 +552,21 @@ class UserProfileTable extends _i1.Table<int?> {
 
   late final _i1.ColumnBool hydrationReminder;
 
-  late final _i1.ColumnString hydrationHistory;
-
   late final _i1.ColumnInt focusCompleted;
 
   late final _i1.ColumnInt focusGivenUp;
+
+  late final _i1.ColumnInt hydrationInterval;
+
+  late final _i1.ColumnBool journalReminder;
+
+  late final _i1.ColumnInt journalInterval;
+
+  late final _i1.ColumnBool bookReminder;
+
+  late final _i1.ColumnInt bookInterval;
+
+  late final _i1.ColumnInt focusModeDuration;
 
   @override
   List<_i1.Column> get columns => [
@@ -457,9 +581,14 @@ class UserProfileTable extends _i1.Table<int?> {
     hydrationCount,
     hydrationDate,
     hydrationReminder,
-    hydrationHistory,
     focusCompleted,
     focusGivenUp,
+    hydrationInterval,
+    journalReminder,
+    journalInterval,
+    bookReminder,
+    bookInterval,
+    focusModeDuration,
   ];
 }
 

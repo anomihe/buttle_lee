@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:share_plus/share_plus.dart';
 import '../utils/gamification_helper.dart';
 
 class LevelProgressWidget extends StatelessWidget {
@@ -76,6 +77,20 @@ class LevelProgressWidget extends StatelessWidget {
                     },
                     child: Icon(
                       Icons.info_outline_rounded,
+                      size: 16,
+                      color: isDark ? Colors.white54 : Colors.black45,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () {
+                      Share.share(
+                        'I just reached Level $level with $xp XP on Butler Lee! 🚀\n#ButlerLee #Productivity #LevelUp',
+                        subject: 'My Butler Lee Stats',
+                      );
+                    },
+                    child: Icon(
+                      Icons.share_rounded,
                       size: 16,
                       color: isDark ? Colors.white54 : Colors.black45,
                     ),

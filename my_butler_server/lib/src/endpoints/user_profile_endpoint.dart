@@ -18,7 +18,7 @@ class UserProfileEndpoint extends Endpoint {
   }
 
   Future<void> updateHydration(Session session, int goal, int count,
-      String? date, bool reminder, String? history) async {
+      String? date, bool reminder, String? history, int? interval) async {
     final authInfo = await session.authenticated;
     if (authInfo == null) return;
     final userId = authInfo.userId;
@@ -31,6 +31,31 @@ class UserProfileEndpoint extends Endpoint {
       profile.hydrationDate = date;
       profile.hydrationReminder = reminder;
       profile.hydrationHistory = history;
+      if (interval != null) profile.hydrationInterval = interval;
+
+      await UserProfile.db.updateRow(session, profile);
+    }
+  }
+
+  Future<void> updateRoutineSettings(
+      Session session,
+      bool journalReminder,
+      int journalInterval,
+      bool bookReminder,
+      int bookInterval,
+      int focusModeDuration) async {
+    final authInfo = await session.authenticated;
+    if (authInfo == null) return;
+    final userId = authInfo.userId;
+
+    var profile = await UserProfile.db
+        .findFirstRow(session, where: (t) => t.userInfoId.equals(userId));
+    if (profile != null) {
+      profile.journalReminder = journalReminder;
+      profile.journalInterval = journalInterval;
+      profile.bookReminder = bookReminder;
+      profile.bookInterval = bookInterval;
+      profile.focusModeDuration = focusModeDuration;
 
       await UserProfile.db.updateRow(session, profile);
     }

@@ -25,16 +25,27 @@ abstract class UserProfile implements _i1.SerializableModel {
     int? hydrationCount,
     this.hydrationDate,
     bool? hydrationReminder,
-    this.hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
+    int? hydrationInterval,
+    bool? journalReminder,
+    int? journalInterval,
+    bool? bookReminder,
+    int? bookInterval,
+    int? focusModeDuration,
   }) : xp = xp ?? 0,
        level = level ?? 1,
        hydrationGoal = hydrationGoal ?? 8,
        hydrationCount = hydrationCount ?? 0,
        hydrationReminder = hydrationReminder ?? false,
        focusCompleted = focusCompleted ?? 0,
-       focusGivenUp = focusGivenUp ?? 0;
+       focusGivenUp = focusGivenUp ?? 0,
+       hydrationInterval = hydrationInterval ?? 60,
+       journalReminder = journalReminder ?? false,
+       journalInterval = journalInterval ?? 24,
+       bookReminder = bookReminder ?? false,
+       bookInterval = bookInterval ?? 24,
+       focusModeDuration = focusModeDuration ?? 25;
 
   factory UserProfile({
     int? id,
@@ -48,9 +59,14 @@ abstract class UserProfile implements _i1.SerializableModel {
     int? hydrationCount,
     String? hydrationDate,
     bool? hydrationReminder,
-    String? hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
+    int? hydrationInterval,
+    bool? journalReminder,
+    int? journalInterval,
+    bool? bookReminder,
+    int? bookInterval,
+    int? focusModeDuration,
   }) = _UserProfileImpl;
 
   factory UserProfile.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -66,9 +82,14 @@ abstract class UserProfile implements _i1.SerializableModel {
       hydrationCount: jsonSerialization['hydrationCount'] as int?,
       hydrationDate: jsonSerialization['hydrationDate'] as String?,
       hydrationReminder: jsonSerialization['hydrationReminder'] as bool?,
-      hydrationHistory: jsonSerialization['hydrationHistory'] as String?,
       focusCompleted: jsonSerialization['focusCompleted'] as int?,
       focusGivenUp: jsonSerialization['focusGivenUp'] as int?,
+      hydrationInterval: jsonSerialization['hydrationInterval'] as int?,
+      journalReminder: jsonSerialization['journalReminder'] as bool?,
+      journalInterval: jsonSerialization['journalInterval'] as int?,
+      bookReminder: jsonSerialization['bookReminder'] as bool?,
+      bookInterval: jsonSerialization['bookInterval'] as int?,
+      focusModeDuration: jsonSerialization['focusModeDuration'] as int?,
     );
   }
 
@@ -97,11 +118,21 @@ abstract class UserProfile implements _i1.SerializableModel {
 
   bool hydrationReminder;
 
-  String? hydrationHistory;
-
   int focusCompleted;
 
   int focusGivenUp;
+
+  int hydrationInterval;
+
+  bool journalReminder;
+
+  int journalInterval;
+
+  bool bookReminder;
+
+  int bookInterval;
+
+  int focusModeDuration;
 
   /// Returns a shallow copy of this [UserProfile]
   /// with some or all fields replaced by the given arguments.
@@ -118,9 +149,14 @@ abstract class UserProfile implements _i1.SerializableModel {
     int? hydrationCount,
     String? hydrationDate,
     bool? hydrationReminder,
-    String? hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
+    int? hydrationInterval,
+    bool? journalReminder,
+    int? journalInterval,
+    bool? bookReminder,
+    int? bookInterval,
+    int? focusModeDuration,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -137,9 +173,14 @@ abstract class UserProfile implements _i1.SerializableModel {
       'hydrationCount': hydrationCount,
       if (hydrationDate != null) 'hydrationDate': hydrationDate,
       'hydrationReminder': hydrationReminder,
-      if (hydrationHistory != null) 'hydrationHistory': hydrationHistory,
       'focusCompleted': focusCompleted,
       'focusGivenUp': focusGivenUp,
+      'hydrationInterval': hydrationInterval,
+      'journalReminder': journalReminder,
+      'journalInterval': journalInterval,
+      'bookReminder': bookReminder,
+      'bookInterval': bookInterval,
+      'focusModeDuration': focusModeDuration,
     };
   }
 
@@ -164,9 +205,14 @@ class _UserProfileImpl extends UserProfile {
     int? hydrationCount,
     String? hydrationDate,
     bool? hydrationReminder,
-    String? hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
+    int? hydrationInterval,
+    bool? journalReminder,
+    int? journalInterval,
+    bool? bookReminder,
+    int? bookInterval,
+    int? focusModeDuration,
   }) : super._(
          id: id,
          fullName: fullName,
@@ -179,9 +225,14 @@ class _UserProfileImpl extends UserProfile {
          hydrationCount: hydrationCount,
          hydrationDate: hydrationDate,
          hydrationReminder: hydrationReminder,
-         hydrationHistory: hydrationHistory,
          focusCompleted: focusCompleted,
          focusGivenUp: focusGivenUp,
+         hydrationInterval: hydrationInterval,
+         journalReminder: journalReminder,
+         journalInterval: journalInterval,
+         bookReminder: bookReminder,
+         bookInterval: bookInterval,
+         focusModeDuration: focusModeDuration,
        );
 
   /// Returns a shallow copy of this [UserProfile]
@@ -200,9 +251,14 @@ class _UserProfileImpl extends UserProfile {
     int? hydrationCount,
     Object? hydrationDate = _Undefined,
     bool? hydrationReminder,
-    Object? hydrationHistory = _Undefined,
     int? focusCompleted,
     int? focusGivenUp,
+    int? hydrationInterval,
+    bool? journalReminder,
+    int? journalInterval,
+    bool? bookReminder,
+    int? bookInterval,
+    int? focusModeDuration,
   }) {
     return UserProfile(
       id: id is int? ? id : this.id,
@@ -220,11 +276,14 @@ class _UserProfileImpl extends UserProfile {
           ? hydrationDate
           : this.hydrationDate,
       hydrationReminder: hydrationReminder ?? this.hydrationReminder,
-      hydrationHistory: hydrationHistory is String?
-          ? hydrationHistory
-          : this.hydrationHistory,
       focusCompleted: focusCompleted ?? this.focusCompleted,
       focusGivenUp: focusGivenUp ?? this.focusGivenUp,
+      hydrationInterval: hydrationInterval ?? this.hydrationInterval,
+      journalReminder: journalReminder ?? this.journalReminder,
+      journalInterval: journalInterval ?? this.journalInterval,
+      bookReminder: bookReminder ?? this.bookReminder,
+      bookInterval: bookInterval ?? this.bookInterval,
+      focusModeDuration: focusModeDuration ?? this.focusModeDuration,
     );
   }
 }

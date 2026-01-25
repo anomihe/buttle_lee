@@ -198,7 +198,7 @@ class NotificationService {
     await flutterLocalNotificationsPlugin.zonedSchedule(
       888, // Hydration specific ID
       'Hydration Check 💧',
-      'Have you had water recently?',
+      'Time to drink some water!',
       tz.TZDateTime.from(scheduledTime, tz.local),
       const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -222,6 +222,43 @@ class NotificationService {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       payload: 'hydration_check',
+    );
+  }
+
+  /// Schedule a recurrent reminder (simulated by spacing out notifications)
+  /// Note: Real 'repeatInterval' in local_notifications is limited (every minute/hour/day/week).
+  /// For custom intervals (e.g. 45 mins), we schedule a one-off and reschedule upon firing/completion,
+  /// or schedule multiple future notifications.
+  /// Here we'll schedule a single shot, assuming the app will re-schedule the next one when this fires
+  /// OR the user interacts. For robustness, we could schedule X instances ahead.
+  Future<void> scheduleRecurrentReminder({
+    required int id,
+    required String title,
+    required String body,
+    required Duration interval,
+  }) async {
+    final now = DateTime.now();
+    // Schedule the first one
+    final scheduledTime = now.add(interval);
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      tz.TZDateTime.from(scheduledTime, tz.local),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'butler_routine_channel',
+          'Routine Reminders',
+          channelDescription: 'Reminders for your daily routines',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 

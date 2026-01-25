@@ -11,9 +11,14 @@ fields:
   hydrationCount: int, default=0
   hydrationDate: String?
   hydrationReminder: bool, default=false
-  hydrationHistory: String?
   focusCompleted: int, default=0
   focusGivenUp: int, default=0
+  hydrationInterval: int, default=60
+  journalReminder: bool, default=false
+  journalInterval: int, default=24
+  bookReminder: bool, default=false
+  bookInterval: int, default=24
+  focusModeDuration: int, default=25
 
 indexes:
   userInfoId_idx:

@@ -12,7 +12,7 @@ class ReminderExecutionCall extends FutureCall {
 
     try {
       // Send real-time notification to all user's connected devices (In-App)
-      session.messages.postMessage(
+      await session.messages.postMessage(
         'reminder_notification',
         reminder,
       );
