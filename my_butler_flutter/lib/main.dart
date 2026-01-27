@@ -46,7 +46,7 @@ void main() async {
 
   await _initFirebase();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
- 
+
   await NotificationService().init();
   runApp(const MyApp());
 }
@@ -62,6 +62,8 @@ class MyApp extends StatelessWidget {
           create: (_) => AuthProvider(
             client: Client(
               'http://136.119.184.62:8080/',
+              // Use localhost for testing if the above remote server is outdated
+              // Platform.isAndroid ? 'http://10.0.2.2:8080/' : 'http://localhost:8080/',
               authenticationKeyManager: FlutterAuthenticationKeyManager(),
               connectionTimeout: const Duration(seconds: 20),
             )..connectivityMonitor = FlutterConnectivityMonitor(),
