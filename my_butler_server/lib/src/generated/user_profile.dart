@@ -26,6 +26,7 @@ abstract class UserProfile
     int? hydrationCount,
     this.hydrationDate,
     bool? hydrationReminder,
+    this.hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
     int? hydrationInterval,
@@ -60,6 +61,7 @@ abstract class UserProfile
     int? hydrationCount,
     String? hydrationDate,
     bool? hydrationReminder,
+    String? hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
     int? hydrationInterval,
@@ -83,6 +85,7 @@ abstract class UserProfile
       hydrationCount: jsonSerialization['hydrationCount'] as int?,
       hydrationDate: jsonSerialization['hydrationDate'] as String?,
       hydrationReminder: jsonSerialization['hydrationReminder'] as bool?,
+      hydrationHistory: jsonSerialization['hydrationHistory'] as String?,
       focusCompleted: jsonSerialization['focusCompleted'] as int?,
       focusGivenUp: jsonSerialization['focusGivenUp'] as int?,
       hydrationInterval: jsonSerialization['hydrationInterval'] as int?,
@@ -121,6 +124,8 @@ abstract class UserProfile
 
   bool hydrationReminder;
 
+  String? hydrationHistory;
+
   int focusCompleted;
 
   int focusGivenUp;
@@ -155,6 +160,7 @@ abstract class UserProfile
     int? hydrationCount,
     String? hydrationDate,
     bool? hydrationReminder,
+    String? hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
     int? hydrationInterval,
@@ -179,6 +185,7 @@ abstract class UserProfile
       'hydrationCount': hydrationCount,
       if (hydrationDate != null) 'hydrationDate': hydrationDate,
       'hydrationReminder': hydrationReminder,
+      if (hydrationHistory != null) 'hydrationHistory': hydrationHistory,
       'focusCompleted': focusCompleted,
       'focusGivenUp': focusGivenUp,
       'hydrationInterval': hydrationInterval,
@@ -205,6 +212,7 @@ abstract class UserProfile
       'hydrationCount': hydrationCount,
       if (hydrationDate != null) 'hydrationDate': hydrationDate,
       'hydrationReminder': hydrationReminder,
+      if (hydrationHistory != null) 'hydrationHistory': hydrationHistory,
       'focusCompleted': focusCompleted,
       'focusGivenUp': focusGivenUp,
       'hydrationInterval': hydrationInterval,
@@ -261,6 +269,7 @@ class _UserProfileImpl extends UserProfile {
     int? hydrationCount,
     String? hydrationDate,
     bool? hydrationReminder,
+    String? hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
     int? hydrationInterval,
@@ -281,6 +290,7 @@ class _UserProfileImpl extends UserProfile {
          hydrationCount: hydrationCount,
          hydrationDate: hydrationDate,
          hydrationReminder: hydrationReminder,
+         hydrationHistory: hydrationHistory,
          focusCompleted: focusCompleted,
          focusGivenUp: focusGivenUp,
          hydrationInterval: hydrationInterval,
@@ -307,6 +317,7 @@ class _UserProfileImpl extends UserProfile {
     int? hydrationCount,
     Object? hydrationDate = _Undefined,
     bool? hydrationReminder,
+    Object? hydrationHistory = _Undefined,
     int? focusCompleted,
     int? focusGivenUp,
     int? hydrationInterval,
@@ -332,6 +343,9 @@ class _UserProfileImpl extends UserProfile {
           ? hydrationDate
           : this.hydrationDate,
       hydrationReminder: hydrationReminder ?? this.hydrationReminder,
+      hydrationHistory: hydrationHistory is String?
+          ? hydrationHistory
+          : this.hydrationHistory,
       focusCompleted: focusCompleted ?? this.focusCompleted,
       focusGivenUp: focusGivenUp ?? this.focusGivenUp,
       hydrationInterval: hydrationInterval ?? this.hydrationInterval,
@@ -398,6 +412,12 @@ class UserProfileUpdateTable extends _i1.UpdateTable<UserProfileTable> {
     table.hydrationReminder,
     value,
   );
+
+  _i1.ColumnValue<String, String> hydrationHistory(String? value) =>
+      _i1.ColumnValue(
+        table.hydrationHistory,
+        value,
+      );
 
   _i1.ColumnValue<int, int> focusCompleted(int value) => _i1.ColumnValue(
     table.focusCompleted,
@@ -488,6 +508,10 @@ class UserProfileTable extends _i1.Table<int?> {
       this,
       hasDefault: true,
     );
+    hydrationHistory = _i1.ColumnString(
+      'hydrationHistory',
+      this,
+    );
     focusCompleted = _i1.ColumnInt(
       'focusCompleted',
       this,
@@ -552,6 +576,8 @@ class UserProfileTable extends _i1.Table<int?> {
 
   late final _i1.ColumnBool hydrationReminder;
 
+  late final _i1.ColumnString hydrationHistory;
+
   late final _i1.ColumnInt focusCompleted;
 
   late final _i1.ColumnInt focusGivenUp;
@@ -581,6 +607,7 @@ class UserProfileTable extends _i1.Table<int?> {
     hydrationCount,
     hydrationDate,
     hydrationReminder,
+    hydrationHistory,
     focusCompleted,
     focusGivenUp,
     hydrationInterval,

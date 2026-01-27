@@ -5,14 +5,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/notification_service.dart';
 
-class RoutineSettingsScreen extends StatefulWidget {
-  const RoutineSettingsScreen({super.key});
+class HabitSettingsScreen extends StatefulWidget {
+  const HabitSettingsScreen({super.key});
 
   @override
-  State<RoutineSettingsScreen> createState() => _RoutineSettingsScreenState();
+  State<HabitSettingsScreen> createState() => _HabitSettingsScreenState();
 }
 
-class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
+class _HabitSettingsScreenState extends State<HabitSettingsScreen> {
   bool _isLoading = true;
 
   // Journal Settings
@@ -25,6 +25,8 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
 
   // Focus Settings
   int _focusDuration = 25; // Minutes
+  bool _focusReminderEnabled = false;
+  int _focusReminderInterval = 4; // Hours
 
   @override
   void initState() {
@@ -37,6 +39,10 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
     final client = context.read<AuthProvider>().client;
 
     try {
+      // Load local prefs first for new fields
+      _focusReminderEnabled = prefs.getBool('focus_reminder_enabled') ?? false;
+      _focusReminderInterval = prefs.getInt('focus_reminder_interval') ?? 4;
+
       final profile = await client.userProfile.getProfile();
       if (profile != null) {
         if (mounted) {
@@ -45,7 +51,9 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
             _journalInterval = profile.journalInterval ?? 24;
             _bookEnabled = profile.bookReminder ?? false;
             _bookInterval = profile.bookInterval ?? 24;
+            // Map focus duration from server
             _focusDuration = profile.focusModeDuration ?? 25;
+
             _isLoading = false;
           });
         }
@@ -64,6 +72,7 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
         _bookEnabled = prefs.getBool('book_enabled') ?? false;
         _bookInterval = prefs.getInt('book_interval') ?? 24;
         _focusDuration = prefs.getInt('focus_duration') ?? 25;
+        // Focus reminder already loaded above
         _isLoading = false;
       });
     }
@@ -73,7 +82,7 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     final client = context.read<AuthProvider>().client;
 
-    // Save to server
+    // Save to server (Existing fields only)
     try {
       await client.userProfile.updateRoutineSettings(
         _journalEnabled,
@@ -92,6 +101,10 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
     await prefs.setBool('book_enabled', _bookEnabled);
     await prefs.setInt('book_interval', _bookInterval);
     await prefs.setInt('focus_duration', _focusDuration);
+
+    // Save new Focus fields
+    await prefs.setBool('focus_reminder_enabled', _focusReminderEnabled);
+    await prefs.setInt('focus_reminder_interval', _focusReminderInterval);
 
     // Schedule/Cancel Notifications
     _updateNotifications();
@@ -120,6 +133,18 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
       );
     } else {
       await NotificationService().cancelNotification(666);
+    }
+
+    // Focus
+    if (_focusReminderEnabled) {
+      await NotificationService().scheduleRecurrentReminder(
+        id: 555,
+        title: 'Time to Focus 🧘',
+        body: 'Ready to get into the zone? Start a focus session now.',
+        interval: Duration(hours: _focusReminderInterval),
+      );
+    } else {
+      await NotificationService().cancelNotification(555);
     }
   }
 
@@ -194,19 +219,42 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
           _buildSectionHeader('Focus Mode'),
           const SizedBox(height: 16),
 
-          // Focus Duration Card
+          // Focus Reminder Card
+          _buildSettingCard(
+            title: 'Focus Check-in',
+            icon: Icons.notifications_active_outlined,
+            color: Colors.indigo,
+            value: _focusReminderEnabled,
+            onToggle: (val) {
+              setState(() => _focusReminderEnabled = val);
+              _saveSettings();
+            },
+            child: _focusReminderEnabled
+                ? _buildTimeSelector(
+                    'Remind me every',
+                    _focusReminderInterval,
+                    (val) {
+                      setState(() => _focusReminderInterval = val);
+                      _saveSettings();
+                    },
+                    isHours: true,
+                  )
+                : null,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Focus Duration Card (Existing but updated style)
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: Theme.of(context)
+                  .cardColor
+                  .withOpacity(0.5), // Uniform background
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              // Remove shadow for flatter/uniform look or keep it?
+              // The user said "uniform with other screens". SettingsTab uses elevation 0 and opacity.
+              // I'll match that.
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,15 +354,10 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color:
+            Theme.of(context).cardColor.withOpacity(0.5), // Uniform background
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        // Removed heavy shadow to match SettingsTab style
         border:
             value ? Border.all(color: color.withOpacity(0.5), width: 2) : null,
       ),
@@ -361,6 +404,9 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
 
   Widget _buildTimeSelector(String label, int value, Function(int) onChanged,
       {bool isHours = false}) {
+    // Generate menu items
+    List<int> items = isHours ? [1, 2, 4, 6, 8, 12, 24, 48] : [30, 60, 90, 120];
+
     return Row(
       children: [
         Text(
@@ -372,13 +418,13 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
         ),
         const Spacer(),
         DropdownButton<int>(
-          value: value,
+          value: items.contains(value) ? value : items.first, // Safety check
           underline: const SizedBox(),
-          items: (isHours ? [12, 24, 48, 72] : [30, 60, 90, 120])
+          items: items
               .map((e) => DropdownMenuItem(
                     value: e,
                     child: Text(
-                      isHours ? '$e hours' : '$e min',
+                      isHours ? '$e ${e == 1 ? "hour" : "hours"}' : '$e min',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ))

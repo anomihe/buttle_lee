@@ -25,6 +25,7 @@ abstract class UserProfile implements _i1.SerializableModel {
     int? hydrationCount,
     this.hydrationDate,
     bool? hydrationReminder,
+    this.hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
     int? hydrationInterval,
@@ -59,6 +60,7 @@ abstract class UserProfile implements _i1.SerializableModel {
     int? hydrationCount,
     String? hydrationDate,
     bool? hydrationReminder,
+    String? hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
     int? hydrationInterval,
@@ -82,6 +84,7 @@ abstract class UserProfile implements _i1.SerializableModel {
       hydrationCount: jsonSerialization['hydrationCount'] as int?,
       hydrationDate: jsonSerialization['hydrationDate'] as String?,
       hydrationReminder: jsonSerialization['hydrationReminder'] as bool?,
+      hydrationHistory: jsonSerialization['hydrationHistory'] as String?,
       focusCompleted: jsonSerialization['focusCompleted'] as int?,
       focusGivenUp: jsonSerialization['focusGivenUp'] as int?,
       hydrationInterval: jsonSerialization['hydrationInterval'] as int?,
@@ -118,6 +121,8 @@ abstract class UserProfile implements _i1.SerializableModel {
 
   bool hydrationReminder;
 
+  String? hydrationHistory;
+
   int focusCompleted;
 
   int focusGivenUp;
@@ -149,6 +154,7 @@ abstract class UserProfile implements _i1.SerializableModel {
     int? hydrationCount,
     String? hydrationDate,
     bool? hydrationReminder,
+    String? hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
     int? hydrationInterval,
@@ -173,6 +179,7 @@ abstract class UserProfile implements _i1.SerializableModel {
       'hydrationCount': hydrationCount,
       if (hydrationDate != null) 'hydrationDate': hydrationDate,
       'hydrationReminder': hydrationReminder,
+      if (hydrationHistory != null) 'hydrationHistory': hydrationHistory,
       'focusCompleted': focusCompleted,
       'focusGivenUp': focusGivenUp,
       'hydrationInterval': hydrationInterval,
@@ -205,6 +212,7 @@ class _UserProfileImpl extends UserProfile {
     int? hydrationCount,
     String? hydrationDate,
     bool? hydrationReminder,
+    String? hydrationHistory,
     int? focusCompleted,
     int? focusGivenUp,
     int? hydrationInterval,
@@ -225,6 +233,7 @@ class _UserProfileImpl extends UserProfile {
          hydrationCount: hydrationCount,
          hydrationDate: hydrationDate,
          hydrationReminder: hydrationReminder,
+         hydrationHistory: hydrationHistory,
          focusCompleted: focusCompleted,
          focusGivenUp: focusGivenUp,
          hydrationInterval: hydrationInterval,
@@ -251,6 +260,7 @@ class _UserProfileImpl extends UserProfile {
     int? hydrationCount,
     Object? hydrationDate = _Undefined,
     bool? hydrationReminder,
+    Object? hydrationHistory = _Undefined,
     int? focusCompleted,
     int? focusGivenUp,
     int? hydrationInterval,
@@ -276,6 +286,9 @@ class _UserProfileImpl extends UserProfile {
           ? hydrationDate
           : this.hydrationDate,
       hydrationReminder: hydrationReminder ?? this.hydrationReminder,
+      hydrationHistory: hydrationHistory is String?
+          ? hydrationHistory
+          : this.hydrationHistory,
       focusCompleted: focusCompleted ?? this.focusCompleted,
       focusGivenUp: focusGivenUp ?? this.focusGivenUp,
       hydrationInterval: hydrationInterval ?? this.hydrationInterval,

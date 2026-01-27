@@ -30,5 +30,11 @@ reminder:
   - updateReminder:
   - deleteReminder:
   - snoozeReminder:
+userProfile:
+  - getProfile:
+  - updateHydration:
+  - updateRoutineSettings:
+  - updateFocusStats:
+  - incrementXp:
 greeting:
   - hello:

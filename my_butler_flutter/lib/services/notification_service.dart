@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show debugPrint;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
@@ -77,6 +78,13 @@ class NotificationService {
       },
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
+
+    // Request Exact Alarms Permission (Android 12+)
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    await androidImplementation?.requestExactAlarmsPermission();
 
     // Initialize Firebase Messaging
     await _initFirebaseMessaging();
@@ -169,60 +177,136 @@ class NotificationService {
     required String body,
     required DateTime scheduledTime,
   }) async {
-    if (scheduledTime.isBefore(DateTime.now())) return;
-
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledTime, tz.local),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'butler_reminders_channel',
-          'Butler Reminders',
-          channelDescription: 'Notifications for your Butler Lee reminders',
-          importance: Importance.max,
-          priority: Priority.high,
+    // If time is now or past, show immediately using show()
+    if (scheduledTime.difference(DateTime.now()).inSeconds < 5) {
+      await flutterLocalNotificationsPlugin.show(
+        id,
+        title,
+        body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'butler_reminders_channel',
+            'Butler Reminders',
+            channelDescription: 'Notifications for your Butler Lee reminders',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
+          iOS: DarwinNotificationDetails(),
         ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
+      );
+      return;
+    }
+
+    debugPrint(
+        'Scheduling regular notification [$id]: "$title" at ${scheduledTime.toLocal()} (Exact)');
+
+    try {
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tz.TZDateTime.from(scheduledTime, tz.local),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'butler_reminders_channel_v2', // Changed ID to force update
+            'Butler Reminders',
+            channelDescription: 'Notifications for your Butler Lee reminders',
+            importance: Importance.max,
+            priority: Priority.max, // Upgraded from high to max
+            fullScreenIntent: true, // Enable full screen intent
+          ),
+          iOS: DarwinNotificationDetails(),
+        ),
+        androidScheduleMode:
+            AndroidScheduleMode.exactAllowWhileIdle, // Ensure EXACT
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } catch (e) {
+      debugPrint(
+          'Error scheduling exact notification [$id]: $e. Falling back to inexact.');
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tz.TZDateTime.from(scheduledTime, tz.local),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'butler_reminders_channel_v2',
+            'Butler Reminders',
+            importance: Importance.max,
+            priority: Priority.max,
+            fullScreenIntent: true,
+          ),
+          iOS: DarwinNotificationDetails(),
+        ),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    }
   }
 
   Future<void> scheduleHydrationReminder(DateTime scheduledTime) async {
     if (scheduledTime.isBefore(DateTime.now())) return;
 
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      888, // Hydration specific ID
-      'Hydration Check 💧',
-      'Time to drink some water!',
-      tz.TZDateTime.from(scheduledTime, tz.local),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'butler_hydration_channel',
-          'Hydration Reminders',
-          channelDescription: 'Reminders to drink water',
-          importance: Importance.max,
-          priority: Priority.high,
-          actions: [
-            AndroidNotificationAction('hydration_yes', 'Yes',
-                showsUserInterface: true),
-            AndroidNotificationAction('hydration_later', 'Later',
-                showsUserInterface: false),
-          ],
+    try {
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        888, // Hydration specific ID
+        'Hydration Check 💧',
+        'Time to drink some water!',
+        tz.TZDateTime.from(scheduledTime, tz.local),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'butler_hydration_channel_v2', // Changed ID
+            'Hydration Reminders',
+            channelDescription: 'Reminders to drink water',
+            importance: Importance.max,
+            priority: Priority.max,
+            fullScreenIntent: true,
+            actions: [
+              AndroidNotificationAction('hydration_yes', 'Yes',
+                  showsUserInterface: true),
+              AndroidNotificationAction('hydration_later', 'Later',
+                  showsUserInterface: false),
+            ],
+          ),
+          iOS: DarwinNotificationDetails(
+            categoryIdentifier: 'hydration_category',
+          ),
         ),
-        iOS: DarwinNotificationDetails(
-          categoryIdentifier: 'hydration_category',
+        androidScheduleMode:
+            AndroidScheduleMode.exactAllowWhileIdle, // Ensure EXACT
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        payload: 'hydration_check',
+      );
+    } catch (e) {
+      debugPrint(
+          'Error scheduling exact hydration reminder: $e. Falling back to inexact.');
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        888,
+        'Hydration Check 💧',
+        'Time to drink some water!',
+        tz.TZDateTime.from(scheduledTime, tz.local),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'butler_hydration_channel_v2',
+            'Hydration Reminders',
+            channelDescription: 'Reminders to drink water',
+            importance: Importance.max,
+            priority: Priority.max,
+            fullScreenIntent: true,
+          ),
+          iOS: DarwinNotificationDetails(
+              categoryIdentifier: 'hydration_category'),
         ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      payload: 'hydration_check',
-    );
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        payload: 'hydration_check',
+      );
+    }
   }
 
   /// Schedule a recurrent reminder (simulated by spacing out notifications)
@@ -238,28 +322,53 @@ class NotificationService {
     required Duration interval,
   }) async {
     final now = DateTime.now();
+    debugPrint(
+        'Scheduling recurrent reminder [$id]: "$title" every ${interval.inMinutes} minutes (Next: ${now.add(interval).toLocal()})');
     // Schedule the first one
     final scheduledTime = now.add(interval);
 
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledTime, tz.local),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'butler_routine_channel',
-          'Routine Reminders',
-          channelDescription: 'Reminders for your daily routines',
-          importance: Importance.max,
-          priority: Priority.high,
+    try {
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tz.TZDateTime.now(tz.local).add(interval),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'butler_routine_channel',
+            'Routine Reminders',
+            channelDescription: 'Reminders for your daily routines',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
+          iOS: DarwinNotificationDetails(),
         ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } catch (e) {
+      debugPrint(
+          'Error scheduling exact recurrent reminder [$id]: $e. Falling back.');
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tz.TZDateTime.now(tz.local).add(interval),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'butler_routine_channel',
+            'Routine Reminders',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
+          iOS: DarwinNotificationDetails(),
+        ),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    }
   }
 
   Future<void> cancelNotification(int id) async {

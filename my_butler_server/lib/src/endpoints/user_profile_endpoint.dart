@@ -7,7 +7,7 @@ class UserProfileEndpoint extends Endpoint {
   bool get requireLogin => true;
 
   Future<UserProfile?> getProfile(Session session) async {
-    final authInfo = await session.authenticated;
+    final authInfo = session.authenticated;
     if (authInfo == null) return null;
     final userId = authInfo.userId;
 
@@ -19,7 +19,7 @@ class UserProfileEndpoint extends Endpoint {
 
   Future<void> updateHydration(Session session, int goal, int count,
       String? date, bool reminder, String? history, int? interval) async {
-    final authInfo = await session.authenticated;
+    final authInfo = session.authenticated;
     if (authInfo == null) return;
     final userId = authInfo.userId;
 
@@ -44,7 +44,7 @@ class UserProfileEndpoint extends Endpoint {
       bool bookReminder,
       int bookInterval,
       int focusModeDuration) async {
-    final authInfo = await session.authenticated;
+    final authInfo = session.authenticated;
     if (authInfo == null) return;
     final userId = authInfo.userId;
 
@@ -63,7 +63,7 @@ class UserProfileEndpoint extends Endpoint {
 
   Future<void> updateFocusStats(
       Session session, int completed, int givenUp) async {
-    final authInfo = await session.authenticated;
+    final authInfo = session.authenticated;
     if (authInfo == null) return;
     final userId = authInfo.userId;
 
@@ -78,7 +78,7 @@ class UserProfileEndpoint extends Endpoint {
 
   /// Increment user XP by a specified amount
   Future<void> incrementXp(Session session, int amount) async {
-    final authInfo = await session.authenticated;
+    final authInfo = session.authenticated;
     if (authInfo == null) return;
     final userId = authInfo.userId;
 

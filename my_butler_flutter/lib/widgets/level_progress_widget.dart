@@ -36,77 +36,88 @@ class LevelProgressWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Text(
-                    'Level $level',
-                    style: GoogleFonts.outfit(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
+              Expanded(
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        'Level $level',
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  InkWell(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('How to Earn XP ⚡️'),
-                          content: const Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('• Complete a task: +10 XP'),
-                              Text('• Finish a focus session: +50 XP'),
-                              Text('• Log water intake: +5 XP'),
-                              Text('• Daily check-in: +20 XP'),
-                              SizedBox(height: 10),
-                              Text(
-                                  'Level up to unlock new badges and features!'),
+                    const SizedBox(width: 6), // Reduced from 8
+                    InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('How to Earn XP ⚡️'),
+                            content: const Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('• Complete a task: +10 XP'),
+                                Text('• Finish a focus session: +50 XP'),
+                                Text('• Log water intake: +5 XP'),
+                                Text('• Daily check-in: +20 XP'),
+                                SizedBox(height: 10),
+                                Text(
+                                    'Level up to unlock new badges and features!'),
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Got it!'),
+                              ),
                             ],
                           ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Got it!'),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    child: Icon(
-                      Icons.info_outline_rounded,
-                      size: 16,
-                      color: isDark ? Colors.white54 : Colors.black45,
+                        );
+                      },
+                      child: Icon(
+                        Icons.info_outline_rounded,
+                        size: 16,
+                        color: isDark ? Colors.white54 : Colors.black45,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  InkWell(
-                    onTap: () {
-                      Share.share(
-                        'I just reached Level $level with $xp XP on Butler Lee! 🚀\n#ButlerLee #Productivity #LevelUp',
-                        subject: 'My Butler Lee Stats',
-                      );
-                    },
-                    child: Icon(
-                      Icons.share_rounded,
-                      size: 16,
-                      color: isDark ? Colors.white54 : Colors.black45,
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: () {
+                        Share.share(
+                          'I just reached Level $level with $xp XP on Butler Lee! 🚀\n#ButlerLee #Productivity #LevelUp',
+                          subject: 'My Butler Lee Stats',
+                        );
+                      },
+                      child: Icon(
+                        Icons.share_rounded,
+                        size: 16,
+                        color: isDark ? Colors.white54 : Colors.black45,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 4),
               Row(
+                mainAxisSize: MainAxisSize.min, // Ensure it takes minimum space
                 children: [
-                  Icon(Icons.bolt, size: 16, color: Colors.amber),
-                  SizedBox(width: 4),
-                  Text(
-                    '$xp XP',
-                    style: GoogleFonts.outfit(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white70 : Colors.black54,
+                  const Icon(Icons.bolt, size: 16, color: Colors.amber),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    // Allow text to shrink if absolutely necessary
+                    child: Text(
+                      '$xp XP',
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],

@@ -60,6 +60,11 @@ class ReminderProvider with ChangeNotifier {
       }
 
       _reminders.sort((a, b) => a.triggerTime.compareTo(b.triggerTime));
+
+      // Sync local notifications for robustness
+      // This ensures that if the app was killed or reminders created elsewhere,
+      // we restore the local alarms for all future active tasks.
+      await rescheduleAllReminders();
     } catch (e) {
       debugPrint('Error loading reminders: $e');
     } finally {
@@ -118,9 +123,8 @@ class ReminderProvider with ChangeNotifier {
         notifyListeners();
 
         // Schedule Notification
-        // triggerTime is already required, so it won't be null
         NotificationService().scheduleNotification(
-          id: createdReminder.id!, // Assuming id is non-null after creation
+          id: createdReminder.id!,
           title: 'Butler Reminder',
           body: createdReminder.description,
           scheduledTime: createdReminder.triggerTime,
@@ -151,7 +155,7 @@ class ReminderProvider with ChangeNotifier {
         reminderType,
         priority: priority,
       );
-      await loadReminders();
+      await loadReminders(); // This will trigger rescheduleAllReminders
     } catch (e) {
       debugPrint('Error updating reminder: $e');
     }
@@ -161,6 +165,8 @@ class ReminderProvider with ChangeNotifier {
   Future<void> deleteReminder(int reminderId) async {
     try {
       await client.reminder.deleteReminder(reminderId);
+      // Cancel notification explicitly
+      NotificationService().cancelNotification(reminderId);
       await loadReminders();
     } catch (e) {
       debugPrint('Error deleting reminder: $e');
@@ -184,7 +190,7 @@ class ReminderProvider with ChangeNotifier {
           notifyListeners();
 
           // Reschedule Notification
-          NotificationService().cancelNotification(reminderId);
+          // Overwriting the schedule is sufficient, but explicit cancel is safer
           NotificationService().scheduleNotification(
             id: reminderId,
             title: 'Snoozed Reminder',
@@ -202,24 +208,23 @@ class ReminderProvider with ChangeNotifier {
     }
   }
 
-  /// Cancel all local notifications and reschedule active future reminders
+  /// Ensure all future active reminders are scheduled locally
+  // Renamed back to public as it is used by FocusModeScreen
   Future<void> rescheduleAllReminders() async {
-    await NotificationService().cancelAll();
-
-    // Ensure we have the latest list
-    if (_reminders.isEmpty) {
-      await loadReminders();
-    }
-
+    // We do NOT use cancelAll() anymore to preserve Hydration/Routine alarms.
+    // Instead we just upsert the schedules.
     final now = DateTime.now();
     for (var reminder in _reminders) {
       if (reminder.triggerTime.isAfter(now) && reminder.isActive) {
-        NotificationService().scheduleNotification(
-          id: reminder.id!,
-          title: 'Butler Reminder',
-          body: reminder.description,
-          scheduledTime: reminder.triggerTime,
-        );
+        // ID is non-null for managed reminders
+        if (reminder.id != null) {
+          NotificationService().scheduleNotification(
+            id: reminder.id!,
+            title: 'Butler Reminder',
+            body: reminder.description,
+            scheduledTime: reminder.triggerTime,
+          );
+        }
       }
     }
   }

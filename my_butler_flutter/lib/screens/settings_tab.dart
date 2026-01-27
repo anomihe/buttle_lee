@@ -6,6 +6,7 @@ import '../providers/persona_provider.dart';
 import '../providers/auth_provider.dart';
 import 'edit_profile_screen.dart';
 import 'routine_settings_screen.dart';
+import 'settings/routine_settings_screen.dart'; // For HabitSettingsScreen
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -83,12 +84,23 @@ class _SettingsTabState extends State<SettingsTab> {
         ),
         _buildTile(
           context,
-          icon: Icons.list_alt_rounded,
-          title: 'Manage Routines',
-          subtitle: 'Journal, Reading, Focus Mode',
+          icon: Icons.checklist_rtl_rounded,
+          title: 'Daily Checklists',
+          subtitle: 'Morning, Afternoon, Evening lists',
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const RoutineSettingsScreen(),
+            ),
+          ),
+        ),
+        _buildTile(
+          context,
+          icon: Icons.notifications_active_rounded,
+          title: 'Habit Reminders',
+          subtitle: 'Journal, Reading, Focus notifications',
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const HabitSettingsScreen(),
             ),
           ),
         ),
@@ -125,7 +137,15 @@ class _SettingsTabState extends State<SettingsTab> {
   Future<void> _showHydrationGoalPicker(
       BuildContext context, int currentGoal) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Load prefs upfront to avoid FutureBuilder reset issues
+    final prefs = await SharedPreferences.getInstance();
+    bool remindersEnabled =
+        prefs.getBool('hydration_reminders_enabled') ?? true;
+    int interval = prefs.getInt('hydration_interval') ?? 60;
     int tempGoal = currentGoal;
+
+    if (!context.mounted) return;
 
     await showModalBottomSheet(
       context: context,
@@ -137,82 +157,165 @@ class _SettingsTabState extends State<SettingsTab> {
             color: isDark ? const Color(0xFF1E2630) : Colors.white,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Daily Water Goal',
-                style: GoogleFonts.outfit(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      if (tempGoal > 1) setModalState(() => tempGoal--);
-                    },
-                    icon: Icon(Icons.remove_circle_outline_rounded,
-                        color: isDark ? Colors.white70 : Colors.black54),
+          child: SingleChildScrollView(
+            // Prevent Overflow
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Daily Water Goal',
+                  style: GoogleFonts.outfit(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
-                  const SizedBox(width: 16),
-                  Text(
-                    '$tempGoal cups',
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        if (tempGoal > 1) setModalState(() => tempGoal--);
+                      },
+                      icon: Icon(Icons.remove_circle_outline_rounded,
+                          color: isDark ? Colors.white70 : Colors.black54),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      '$tempGoal cups',
+                      style: GoogleFonts.outfit(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    IconButton(
+                      onPressed: () {
+                        setModalState(() => tempGoal++);
+                      },
+                      icon: Icon(Icons.add_circle_outline_rounded,
+                          color: isDark ? Colors.white70 : Colors.black54),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Reminders Toggle & Interval
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    'Hydration Reminders',
                     style: GoogleFonts.outfit(
-                      fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  IconButton(
-                    onPressed: () {
-                      setModalState(() => tempGoal++);
-                    },
-                    icon: Icon(Icons.add_circle_outline_rounded,
-                        color: isDark ? Colors.white70 : Colors.black54),
+                  value: remindersEnabled,
+                  onChanged: (val) async {
+                    remindersEnabled = val;
+                    await prefs.setBool('hydration_reminders_enabled', val);
+                    setModalState(() {});
+                  },
+                ),
+                if (remindersEnabled) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    'Frequency',
+                    style: GoogleFonts.outfit(
+                      fontSize: 14,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildIntervalButton(context, 30, interval, isDark,
+                          (val) async {
+                        interval = val;
+                        await prefs.setInt('hydration_interval', val);
+                        setModalState(() {});
+                      }),
+                      _buildIntervalButton(context, 60, interval, isDark,
+                          (val) async {
+                        interval = val;
+                        await prefs.setInt('hydration_interval', val);
+                        setModalState(() {});
+                      }),
+                      _buildIntervalButton(context, 90, interval, isDark,
+                          (val) async {
+                        interval = val;
+                        await prefs.setInt('hydration_interval', val);
+                        setModalState(() {});
+                      }),
+                    ],
                   ),
                 ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Recommended: 8 cups/day',
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  color: isDark ? Colors.white38 : Colors.black38,
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setInt('hydration_goal', tempGoal);
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                      setState(
-                          () {}); // This setState now belongs to _SettingsTabState
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+
+                const SizedBox(height: 24),
+                Text(
+                  'Recommended: 8 cups/day',
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    color: isDark ? Colors.white38 : Colors.black38,
                   ),
-                  child: Text('Save Goal',
-                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
                 ),
-              ),
-              const SizedBox(height: 16),
-            ],
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await prefs.setInt('hydration_goal', tempGoal);
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        setState(() {});
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text('Save Goal',
+                        style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper inside the method (or class) for buttons
+  Widget _buildIntervalButton(BuildContext context, int minutes,
+      int currentInterval, bool isDark, Function(int) onTap) {
+    final isSelected = currentInterval == minutes;
+    return InkWell(
+      onTap: () => onTap(minutes),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).primaryColor
+              : (isDark ? Colors.white12 : Colors.grey[200]),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          '$minutes m',
+          style: TextStyle(
+            color: isSelected
+                ? Colors.white
+                : (isDark ? Colors.white70 : Colors.black87),
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -386,11 +489,10 @@ class _SettingsTabState extends State<SettingsTab> {
                     color: Colors.grey.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(2))),
             Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text('Select Persona',
-                  style: GoogleFonts.outfit(
-                      fontSize: 18, fontWeight: FontWeight.bold)),
-            ),
+                padding: const EdgeInsets.all(16),
+                child: Text('Select Persona',
+                    style: GoogleFonts.outfit(
+                        fontSize: 18, fontWeight: FontWeight.bold))),
             ...PersonaMode.values.map((mode) => ListTile(
                   leading: Icon(provider.getIconForMode(mode)),
                   title: Text(provider.getNameForMode(mode)),

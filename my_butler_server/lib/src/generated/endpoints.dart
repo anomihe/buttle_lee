@@ -17,16 +17,17 @@ import '../endpoints/auth_endpoint.dart' as _i4;
 import '../endpoints/book_endpoint.dart' as _i5;
 import '../endpoints/household_endpoint.dart' as _i6;
 import '../endpoints/reminder_endpoint.dart' as _i7;
-import '../greeting_endpoint.dart' as _i8;
-import 'package:my_butler_server/src/generated/book.dart' as _i9;
-import 'package:my_butler_server/src/generated/reminder_type.dart' as _i10;
-import 'package:my_butler_server/src/generated/priority.dart' as _i11;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i12;
+import '../endpoints/user_profile_endpoint.dart' as _i8;
+import '../greeting_endpoint.dart' as _i9;
+import 'package:my_butler_server/src/generated/book.dart' as _i10;
+import 'package:my_butler_server/src/generated/reminder_type.dart' as _i11;
+import 'package:my_butler_server/src/generated/priority.dart' as _i12;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i13;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i13;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i14;
-import 'package:my_butler_server/src/generated/future_calls.dart' as _i15;
+import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+    as _i15;
+import 'package:my_butler_server/src/generated/future_calls.dart' as _i16;
 export 'future_calls.dart' show ServerpodFutureCallsGetter;
 
 class Endpoints extends _i1.EndpointDispatch {
@@ -69,7 +70,13 @@ class Endpoints extends _i1.EndpointDispatch {
           'reminder',
           null,
         ),
-      'greeting': _i8.GreetingEndpoint()
+      'userProfile': _i8.UserProfileEndpoint()
+        ..initialize(
+          server,
+          'userProfile',
+          null,
+        ),
+      'greeting': _i9.GreetingEndpoint()
         ..initialize(
           server,
           'greeting',
@@ -228,7 +235,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'book': _i1.ParameterDescription(
               name: 'book',
-              type: _i1.getType<_i9.Book>(),
+              type: _i1.getType<_i10.Book>(),
               nullable: false,
             ),
           },
@@ -495,12 +502,12 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'reminderType': _i1.ParameterDescription(
               name: 'reminderType',
-              type: _i1.getType<_i10.ReminderType>(),
+              type: _i1.getType<_i11.ReminderType>(),
               nullable: false,
             ),
             'priority': _i1.ParameterDescription(
               name: 'priority',
-              type: _i1.getType<_i11.Priority>(),
+              type: _i1.getType<_i12.Priority>(),
               nullable: false,
             ),
           },
@@ -582,12 +589,12 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'reminderType': _i1.ParameterDescription(
               name: 'reminderType',
-              type: _i1.getType<_i10.ReminderType?>(),
+              type: _i1.getType<_i11.ReminderType?>(),
               nullable: true,
             ),
             'priority': _i1.ParameterDescription(
               name: 'priority',
-              type: _i1.getType<_i11.Priority?>(),
+              type: _i1.getType<_i12.Priority?>(),
               nullable: true,
             ),
           },
@@ -651,6 +658,158 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
+    connectors['userProfile'] = _i1.EndpointConnector(
+      name: 'userProfile',
+      endpoint: endpoints['userProfile']!,
+      methodConnectors: {
+        'getProfile': _i1.MethodConnector(
+          name: 'getProfile',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['userProfile'] as _i8.UserProfileEndpoint)
+                  .getProfile(session),
+        ),
+        'updateHydration': _i1.MethodConnector(
+          name: 'updateHydration',
+          params: {
+            'goal': _i1.ParameterDescription(
+              name: 'goal',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'count': _i1.ParameterDescription(
+              name: 'count',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'date': _i1.ParameterDescription(
+              name: 'date',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'reminder': _i1.ParameterDescription(
+              name: 'reminder',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+            'history': _i1.ParameterDescription(
+              name: 'history',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'interval': _i1.ParameterDescription(
+              name: 'interval',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['userProfile'] as _i8.UserProfileEndpoint)
+                  .updateHydration(
+                    session,
+                    params['goal'],
+                    params['count'],
+                    params['date'],
+                    params['reminder'],
+                    params['history'],
+                    params['interval'],
+                  ),
+        ),
+        'updateRoutineSettings': _i1.MethodConnector(
+          name: 'updateRoutineSettings',
+          params: {
+            'journalReminder': _i1.ParameterDescription(
+              name: 'journalReminder',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+            'journalInterval': _i1.ParameterDescription(
+              name: 'journalInterval',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'bookReminder': _i1.ParameterDescription(
+              name: 'bookReminder',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+            'bookInterval': _i1.ParameterDescription(
+              name: 'bookInterval',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'focusModeDuration': _i1.ParameterDescription(
+              name: 'focusModeDuration',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['userProfile'] as _i8.UserProfileEndpoint)
+                  .updateRoutineSettings(
+                    session,
+                    params['journalReminder'],
+                    params['journalInterval'],
+                    params['bookReminder'],
+                    params['bookInterval'],
+                    params['focusModeDuration'],
+                  ),
+        ),
+        'updateFocusStats': _i1.MethodConnector(
+          name: 'updateFocusStats',
+          params: {
+            'completed': _i1.ParameterDescription(
+              name: 'completed',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'givenUp': _i1.ParameterDescription(
+              name: 'givenUp',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['userProfile'] as _i8.UserProfileEndpoint)
+                  .updateFocusStats(
+                    session,
+                    params['completed'],
+                    params['givenUp'],
+                  ),
+        ),
+        'incrementXp': _i1.MethodConnector(
+          name: 'incrementXp',
+          params: {
+            'amount': _i1.ParameterDescription(
+              name: 'amount',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['userProfile'] as _i8.UserProfileEndpoint)
+                  .incrementXp(
+                    session,
+                    params['amount'],
+                  ),
+        ),
+      },
+    );
     connectors['greeting'] = _i1.EndpointConnector(
       name: 'greeting',
       endpoint: endpoints['greeting']!,
@@ -668,22 +827,22 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['greeting'] as _i8.GreetingEndpoint).hello(
+              ) async => (endpoints['greeting'] as _i9.GreetingEndpoint).hello(
                 session,
                 params['name'],
               ),
         ),
       },
     );
-    modules['serverpod_auth'] = _i12.Endpoints()..initializeEndpoints(server);
-    modules['serverpod_auth_idp'] = _i13.Endpoints()
+    modules['serverpod_auth'] = _i13.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth_idp'] = _i14.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i14.Endpoints()
+    modules['serverpod_auth_core'] = _i15.Endpoints()
       ..initializeEndpoints(server);
   }
 
   @override
   _i1.FutureCallDispatch? get futureCalls {
-    return _i15.FutureCalls();
+    return _i16.FutureCalls();
   }
 }

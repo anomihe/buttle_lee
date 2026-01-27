@@ -514,6 +514,12 @@ class Protocol extends _i1.SerializationManagerServer {
           columnDefault: 'false',
         ),
         _i2.ColumnDefinition(
+          name: 'hydrationHistory',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
           name: 'focusCompleted',
           columnType: _i2.ColumnType.bigint,
           isNullable: false,
