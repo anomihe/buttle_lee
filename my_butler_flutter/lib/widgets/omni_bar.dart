@@ -6,6 +6,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/auth_provider.dart';
 import '../providers/reminder_provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:intl/intl.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 class OmniBar extends StatefulWidget {
   const OmniBar({super.key});
@@ -146,7 +148,15 @@ class OmniBarState extends State<OmniBar> with SingleTickerProviderStateMixin {
 
     try {
       final authProvider = context.read<AuthProvider>();
-      final response = await authProvider.client.ai.processCommand(command);
+
+      // Add local time context for the AI
+      final now = DateTime.now();
+      final timeZoneName = await FlutterTimezone.getLocalTimezone();
+      final contextString =
+          '\n[System Context: User Local Time: ${DateFormat('HH:mm').format(now)}, Date: ${DateFormat('yyyy-MM-dd').format(now)}, Timezone: $timeZoneName]';
+
+      final response = await authProvider.client.ai
+          .processCommand('$command $contextString');
 
       setState(() => _isProcessing = false);
       _controller.clear();

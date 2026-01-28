@@ -277,40 +277,47 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.1),
-                          shape: BoxShape.circle,
+                  Expanded(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.water_drop_rounded,
+                              color: Colors.blue, size: 20),
                         ),
-                        child: const Icon(Icons.water_drop_rounded,
-                            color: Colors.blue, size: 20),
-                      ),
-                      const SizedBox(width: 12),
-                      GestureDetector(
-                        onTap: () => _showHistory(context),
-                        child: Text(
-                          'Hydration',
-                          style: GoogleFonts.outfit(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black87,
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: GestureDetector(
+                            onTap: () => _showHistory(context),
+                            child: Text(
+                              'Hydration',
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.outfit(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       if (_reminderEnabled)
                         GestureDetector(
                           onTap: _showIntervalPicker,
                           child: Container(
-                            margin: const EdgeInsets.only(right: 8),
+                            margin: const EdgeInsets.only(right: 4),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 6),
+                                horizontal: 8, vertical: 6),
                             decoration: BoxDecoration(
                               color: Colors.blue.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
@@ -335,6 +342,8 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
                           ),
                         ),
                       IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                         icon: Icon(
                           _reminderEnabled
                               ? Icons.notifications_active_rounded
@@ -345,7 +354,10 @@ class HydrationTrackerWidgetState extends State<HydrationTrackerWidget>
                         onPressed: _toggleReminder,
                         tooltip: 'Toggle Reminder',
                       ),
+                      const SizedBox(width: 8),
                       IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                         icon: Icon(Icons.history_rounded,
                             color: isDark ? Colors.white70 : Colors.black54,
                             size: 20),

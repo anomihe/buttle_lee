@@ -1,5 +1,5 @@
 # Build stage
-FROM dart:stable AS build
+FROM dart:3.10 AS build
 WORKDIR /app
 COPY . .
 
@@ -30,10 +30,14 @@ COPY --from=build /app/migrations/ migrations/
 # This file is required to enable the endpoint log filter in Insights.
 COPY --from=build /app/lib/src/generated/protocol.yaml lib/src/generated/protocol.yaml
 
+# Copy startup script
+COPY start.sh .
+RUN chmod +x start.sh
+
 # Expose ports
 EXPOSE 8080
 EXPOSE 8081
 EXPOSE 8082
 
 # Define the entrypoint command
-ENTRYPOINT ./server --mode=$runmode --server-id=$serverid --logging=$logging --role=$role
+ENTRYPOINT ["./start.sh"]

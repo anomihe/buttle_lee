@@ -61,9 +61,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(
             client: Client(
-              'http://136.119.184.62:8080/',
-              // Use localhost for testing if the above remote server is outdated
-              // Platform.isAndroid ? 'http://10.0.2.2:8080/' : 'http://localhost:8080/',
+              // 'http://136.119.74.168:8080/',
+              // Switch to local for testing server changes
+              Platform.isAndroid
+                  ? 'http://10.0.2.2:8080/'
+                  : 'http://localhost:8080/',
               authenticationKeyManager: FlutterAuthenticationKeyManager(),
               connectionTimeout: const Duration(seconds: 20),
             )..connectivityMonitor = FlutterConnectivityMonitor(),

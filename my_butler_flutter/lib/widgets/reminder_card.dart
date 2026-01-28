@@ -21,7 +21,8 @@ class ReminderCard extends StatelessWidget {
 
   String _formatDateTime(DateTime dateTime) {
     final now = DateTime.now();
-    final difference = dateTime.difference(now);
+    final localDateTime = dateTime.toLocal(); // Convert to local time
+    final difference = localDateTime.difference(now);
 
     if (difference.isNegative) {
       return 'Overdue';
@@ -153,8 +154,8 @@ class ReminderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final timeUntil = _formatDateTime(reminder.triggerTime);
-    final formattedDate =
-        DateFormat('MMM d, y • h:mm a').format(reminder.triggerTime);
+    final formattedDate = DateFormat('MMM d, y • h:mm a')
+        .format(reminder.triggerTime.toLocal()); // Use local time
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(

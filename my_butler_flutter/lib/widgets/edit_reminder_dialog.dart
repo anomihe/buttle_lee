@@ -25,12 +25,13 @@ class _EditReminderBottomSheetState extends State<EditReminderBottomSheet> {
     super.initState();
     _descriptionController =
         TextEditingController(text: widget.reminder.description);
+    final localTriggerTime = widget.reminder.triggerTime.toLocal();
     _selectedDate = DateTime(
-      widget.reminder.triggerTime.year,
-      widget.reminder.triggerTime.month,
-      widget.reminder.triggerTime.day,
+      localTriggerTime.year,
+      localTriggerTime.month,
+      localTriggerTime.day,
     );
-    _selectedTime = TimeOfDay.fromDateTime(widget.reminder.triggerTime);
+    _selectedTime = TimeOfDay.fromDateTime(localTriggerTime);
     _selectedType = widget.reminder.reminderType;
     _selectedPriority = widget.reminder.priority;
   }

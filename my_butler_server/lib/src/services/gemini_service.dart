@@ -50,10 +50,11 @@ class GeminiService {
     final prompt = '''
 You are Butler Lee, a helpful, intelligent, and chatty AI butler. 
 $dateContext
-Current time: ${now.hour}:${now.minute.toString().padLeft(2, '0')}
+Current Server Time: ${now.hour}:${now.minute.toString().padLeft(2, '0')} (UTC)
+
 Your goal is to assist the user with their daily tasks, reminders, and questions.
-Be conversational and engaging. Don't be too brief; explain your thoughts or offer extra helpful advice. 
-However, if the user explicitly asks to set a reminder or query reminders, you MUST extract that intent accurately.
+You will receive a command that includes a [System Context] block containing the user's Local Time and Timezone.
+USE THIS CONTEXT. All times in the command are relative to the User's Local Time, not the server time.
 
 Parse the following command and extract the intent.
 
@@ -66,40 +67,19 @@ Respond with a JSON object containing:
 - For general: "response" (a conversational, helpful text response)
 
 TIME PARSING RULES (CRITICAL):
-1. Relative times:
-   - "in X minutes" → add X minutes to current time
-   - "in X hours" → add X hours to current time
-   - "in the next X minutes/hours" → same as above
-   - "in X days" → add X days to current date, use same time or specified time
-   
-2. Specific times today:
-   - "at 3 PM", "at 15:00" → today at that time (if not passed, else tomorrow)
-   
-3. Tomorrow:
-   - "tomorrow" → next day, default to 9:00 AM unless time specified
-   - "tomorrow at 3 PM" → next day at 15:00
-   
-4. Day of week:
-   - "Monday", "next Monday" → upcoming Monday at 9:00 AM unless time specified
+1. **UTC CONVERSION**: You MUST calculate the specific UTC timestamp for the "time" field.
+   - Use the User's Local Time and Timezone from the context to determine the offset.
+   - Example: If User Time is 12:00 (UTC+1) and they say "at 1 PM" (13:00), the UTC time is 12:00Z.
+   - Return the result in UTC (ending in Z), e.g., "2026-01-28T12:00:00Z".
 
-5. Always return ISO 8601 format for "time" field:
-   - Full datetime: "2026-01-23T15:30:00"
-   - Time only (for today): "15:30" (will be converted to today's date)
+2. Relative times:
+   - "in X minutes" → add X minutes to User's Local Time -> convert to UTC
+   
+3. Specific times:
+   - "at 3 PM" → Today at 3 PM (User's Time) -> convert to UTC
 
-Priority detection rules:
-- "urgent", "important", "critical", "asap" → high
-- "low priority", "not urgent", "whenever" → low
-- Default → medium
-
-Examples:
-"Remind me to eat every day at 1 PM" → {"action": "create_reminder", "description": "eat", "time": "13:00", "type": "daily", "priority": "medium"}
-"Remind me to test in 2 minutes" → {"action": "create_reminder", "description": "test", "time": "${now.add(Duration(minutes: 2)).toIso8601String()}", "type": "once", "priority": "medium"}
-"Remind me in the next 5 minutes to check email" → {"action": "create_reminder", "description": "check email", "time": "${now.add(Duration(minutes: 5)).toIso8601String()}", "type": "once", "priority": "medium"}
-"Remind me in 1 hour to call mom" → {"action": "create_reminder", "description": "call mom", "time": "${now.add(Duration(hours: 1)).toIso8601String()}", "type": "once", "priority": "medium"}
-"Remind me tomorrow at 3 PM to submit report" → {"action": "create_reminder", "description": "submit report", "time": "${now.add(Duration(days: 1)).toIso8601String().split('T')[0]}T15:00:00", "type": "once", "priority": "medium"}
-"Urgent reminder to call the doctor at 3 PM" → {"action": "create_reminder", "description": "call the doctor", "time": "15:00", "type": "once", "priority": "high"}
-"When is my next meeting?" → {"action": "query_reminders", "query_type": "next"}
-"What should I do today?" → {"action": "general", "response": "Well, today is ${_formatDate(now)}. It's a great day to focus on your goals! You have a few reminders coming up..."}
+4. Return ISO 8601 format for "time" field:
+   - "2026-01-23T15:30:00Z" (MUST be UTC)
 
 Respond ONLY with valid JSON, no other text.
 ''';

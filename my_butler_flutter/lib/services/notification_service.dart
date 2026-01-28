@@ -4,6 +4,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 // Top-level function for background handling
@@ -32,7 +33,10 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
+    // Initialize timezone
     tz_data.initializeTimeZones();
+    final String timeZoneName = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timeZoneName));
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/launcher_icon');
@@ -85,6 +89,7 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin>();
 
     await androidImplementation?.requestExactAlarmsPermission();
+    await androidImplementation?.requestNotificationsPermission();
 
     // Initialize Firebase Messaging
     await _initFirebaseMessaging();
