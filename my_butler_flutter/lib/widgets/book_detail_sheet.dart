@@ -58,9 +58,11 @@ class _BookDetailSheetState extends State<BookDetailSheet> {
   Future<void> _completeBook() async {
     final lessonsController = TextEditingController();
 
-    final result = await showDialog<String>(
+    final result = await showModalBottomSheet<String>(
       context: context,
-      builder: (context) => _LessonsDialog(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _LessonsBottomSheet(
         controller: lessonsController,
         title: 'Complete Book',
         subtitle: 'What did you learn from this book?',
@@ -85,9 +87,11 @@ class _BookDetailSheetState extends State<BookDetailSheet> {
       text: widget.book.lessonsLearned ?? '',
     );
 
-    final result = await showDialog<String>(
+    final result = await showModalBottomSheet<String>(
       context: context,
-      builder: (context) => _LessonsDialog(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _LessonsBottomSheet(
         controller: lessonsController,
         title: 'Edit Lessons',
         subtitle: 'Update what you learned from this book',
@@ -486,13 +490,13 @@ class _BookDetailSheetState extends State<BookDetailSheet> {
   }
 }
 
-// Lessons Dialog
-class _LessonsDialog extends StatelessWidget {
+// Lessons Bottom Sheet
+class _LessonsBottomSheet extends StatelessWidget {
   final TextEditingController controller;
   final String title;
   final String subtitle;
 
-  const _LessonsDialog({
+  const _LessonsBottomSheet({
     required this.controller,
     required this.title,
     required this.subtitle,
@@ -503,76 +507,139 @@ class _LessonsDialog extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).colorScheme.primary;
 
-    return AlertDialog(
-      backgroundColor: isDark ? const Color(0xFF1B2838) : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.bold,
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1B2838) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Text Field
+                TextField(
+                  controller: controller,
+                  maxLines: 5,
+                  autofocus: true,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Write your thoughts here...',
+                    hintStyle: TextStyle(
+                      color: isDark
+                          ? Colors.white.withOpacity(0.3)
+                          : Colors.black.withOpacity(0.3),
+                    ),
+                    filled: true,
+                    fillColor: isDark
+                        ? Colors.white.withOpacity(0.05)
+                        : Colors.grey.withOpacity(0.05),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: primaryColor, width: 2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Action Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor:
+                              isDark ? Colors.white70 : Colors.black54,
+                          side: BorderSide(
+                            color: isDark
+                                ? Colors.white.withOpacity(0.2)
+                                : Colors.black.withOpacity(0.2),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (controller.text.trim().isNotEmpty) {
+                            Navigator.pop(context, controller.text.trim());
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Save',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            subtitle,
-            style: TextStyle(
-              fontSize: 14,
-              color: isDark ? Colors.white70 : Colors.black54,
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: controller,
-            maxLines: 5,
-            autofocus: true,
-            style: TextStyle(
-              color: isDark ? Colors.white : Colors.black87,
-            ),
-            decoration: InputDecoration(
-              hintText: 'Write your thoughts here...',
-              hintStyle: TextStyle(
-                color: isDark
-                    ? Colors.white.withOpacity(0.3)
-                    : Colors.black.withOpacity(0.3),
-              ),
-              filled: true,
-              fillColor: isDark
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.grey.withOpacity(0.05),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: primaryColor, width: 2),
-              ),
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (controller.text.trim().isNotEmpty) {
-              Navigator.pop(context, controller.text.trim());
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: primaryColor,
-            foregroundColor: Colors.white,
-          ),
-          child: const Text('Save'),
-        ),
-      ],
     );
   }
 }

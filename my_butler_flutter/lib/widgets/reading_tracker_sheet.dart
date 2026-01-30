@@ -356,27 +356,37 @@ class _AddBookBottomSheetState extends State<_AddBookBottomSheet> {
     });
   }
 
+  bool _isSubmitting = false;
+
   void _handleAddBook() async {
     if (_formKey.currentState!.validate()) {
-      final chapterTitles = _chapterControllers
-          .map((c) => c.text)
-          .where((text) => text.isNotEmpty)
-          .toList();
+      setState(() => _isSubmitting = true);
 
-      if (chapterTitles.isNotEmpty) {
-        await context.read<BookProvider>().addBookWithChapters(
-              _titleController.text,
-              _authorController.text,
-              chapterTitles,
-            );
-      } else {
-        await context
-            .read<BookProvider>()
-            .addBook(_titleController.text, _authorController.text);
-      }
+      try {
+        final chapterTitles = _chapterControllers
+            .map((c) => c.text)
+            .where((text) => text.isNotEmpty)
+            .toList();
 
-      if (mounted) {
-        Navigator.pop(context);
+        if (chapterTitles.isNotEmpty) {
+          await context.read<BookProvider>().addBookWithChapters(
+                _titleController.text,
+                _authorController.text,
+                chapterTitles,
+              );
+        } else {
+          await context
+              .read<BookProvider>()
+              .addBook(_titleController.text, _authorController.text);
+        }
+
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isSubmitting = false);
+        }
       }
     }
   }
@@ -684,7 +694,7 @@ class _AddBookBottomSheetState extends State<_AddBookBottomSheet> {
                   width: double.infinity,
                   height: 54,
                   child: ElevatedButton(
-                    onPressed: _handleAddBook,
+                    onPressed: _isSubmitting ? null : _handleAddBook,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
                       foregroundColor: Colors.white,
@@ -693,21 +703,31 @@ class _AddBookBottomSheetState extends State<_AddBookBottomSheet> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.play_arrow_rounded, size: 24),
-                        SizedBox(width: 8),
-                        Text(
-                          'Start Reading',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.play_arrow_rounded, size: 24),
+                              SizedBox(width: 8),
+                              Text(
+                                'Start Reading',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
