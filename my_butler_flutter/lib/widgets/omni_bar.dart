@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/auth_provider.dart';
 import '../providers/reminder_provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../services/notification_service.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 
@@ -143,6 +144,23 @@ class OmniBarState extends State<OmniBar> with SingleTickerProviderStateMixin {
 
     final command = _controller.text.trim();
     if (command.isEmpty) return;
+
+    // Debug command for testing notifications
+    if (command.toLowerCase() == 'test notification') {
+      try {
+        await Function.apply(
+            () => NotificationService().showTestNotification(), []);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Triggered test notification')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+      _controller.clear();
+      return;
+    }
 
     setState(() => _isProcessing = true);
 

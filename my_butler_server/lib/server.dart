@@ -6,6 +6,7 @@ import 'package:my_butler_server/src/web/routes/root.dart';
 
 import 'src/generated/protocol.dart';
 import 'src/generated/endpoints.dart';
+import 'src/endpoints/auth_endpoint.dart';
 import 'src/future_calls/reminder_execution_call.dart';
 
 // This is the starting point of your Serverpod server. In most cases, you will
@@ -32,6 +33,12 @@ void run(List<String> args) async {
     sendPasswordResetEmail: (session, userInfo, validationCode) async {
       session.log('Password reset code for ${userInfo.email}: $validationCode',
           level: LogLevel.info);
+
+      // Intercept code for direct reset flow
+      if (userInfo.email != null) {
+        AuthEndpoint.latestResetCodes[userInfo.email!] = validationCode;
+      }
+
       return true;
     },
     onUserCreated: (session, userInfo) async {

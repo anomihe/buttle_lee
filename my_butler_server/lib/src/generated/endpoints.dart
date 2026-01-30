@@ -224,6 +224,49 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['profileImageUrl'],
                   ),
         ),
+        'checkEmailExists': _i1.MethodConnector(
+          name: 'checkEmailExists',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['auth'] as _i4.AuthEndpoint).checkEmailExists(
+                    session,
+                    params['email'],
+                  ),
+        ),
+        'resetPassword': _i1.MethodConnector(
+          name: 'resetPassword',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'newPassword': _i1.ParameterDescription(
+              name: 'newPassword',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['auth'] as _i4.AuthEndpoint).resetPassword(
+                session,
+                params['email'],
+                params['newPassword'],
+              ),
+        ),
       },
     );
     connectors['book'] = _i1.EndpointConnector(

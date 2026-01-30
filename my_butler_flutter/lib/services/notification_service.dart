@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+import 'dart:ui' show Color;
+
 import 'package:flutter/material.dart' show debugPrint;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -66,6 +69,7 @@ class NotificationService {
       iOS: initializationSettingsDarwin,
     );
 
+    await _createNotificationChannels();
 // ... (existing imports)
 
 // ... (inside init method)
@@ -142,6 +146,47 @@ class NotificationService {
     }
   }
 
+  Future<void> _createNotificationChannels() async {
+    // Android 8.0+ requires notification channels
+    final AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'butler_reminders_channel_v2',
+      'Butler Reminders',
+      description: 'Notifications for your Butler Lee reminders',
+      importance: Importance.max,
+      playSound: true,
+      enableVibration: true,
+      vibrationPattern: Int64List.fromList(const [0, 500, 500, 500]),
+    );
+
+    const AndroidNotificationChannel hydrationChannel =
+        AndroidNotificationChannel(
+      'butler_hydration_channel_v2',
+      'Hydration Reminders',
+      description: 'Reminders to drink water',
+      importance: Importance.max,
+      playSound: true,
+      enableVibration: true,
+    );
+
+    const AndroidNotificationChannel routineChannel =
+        AndroidNotificationChannel(
+      'butler_routine_channel',
+      'Routine Reminders',
+      description: 'Reminders for your daily routines',
+      importance: Importance.max,
+      playSound: true,
+      enableVibration: true,
+    );
+
+    final androidPlugin =
+        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    await androidPlugin?.createNotificationChannel(channel);
+    await androidPlugin?.createNotificationChannel(hydrationChannel);
+    await androidPlugin?.createNotificationChannel(routineChannel);
+  }
+
   /// Subscribe to user-specific topic for FCM notifications
   Future<void> subscribeToTopic(String topic) async {
     try {
@@ -182,75 +227,156 @@ class NotificationService {
     required String body,
     required DateTime scheduledTime,
   }) async {
-    // If time is now or past, show immediately using show()
-    if (scheduledTime.difference(DateTime.now()).inSeconds < 5) {
-      await flutterLocalNotificationsPlugin.show(
-        id,
-        title,
-        body,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'butler_reminders_channel',
-            'Butler Reminders',
-            channelDescription: 'Notifications for your Butler Lee reminders',
-            importance: Importance.max,
-            priority: Priority.high,
-          ),
-          iOS: DarwinNotificationDetails(),
-        ),
-      );
-      return;
-    }
-
-    debugPrint(
-        'Scheduling regular notification [$id]: "$title" at ${scheduledTime.toLocal()} (Exact)');
-
     try {
+      final tzTime = tz.TZDateTime.from(scheduledTime, tz.local);
+      debugPrint('Scheduling notification [$id] at: $tzTime');
+
+      // Always use exact scheduling for better reliability
       await flutterLocalNotificationsPlugin.zonedSchedule(
         id,
         title,
         body,
-        tz.TZDateTime.from(scheduledTime, tz.local),
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'butler_reminders_channel_v2', // Changed ID to force update
-            'Butler Reminders',
-            channelDescription: 'Notifications for your Butler Lee reminders',
-            importance: Importance.max,
-            priority: Priority.max, // Upgraded from high to max
-            fullScreenIntent: true, // Enable full screen intent
-          ),
-          iOS: DarwinNotificationDetails(),
-        ),
-        androidScheduleMode:
-            AndroidScheduleMode.exactAllowWhileIdle, // Ensure EXACT
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-      );
-    } catch (e) {
-      debugPrint(
-          'Error scheduling exact notification [$id]: $e. Falling back to inexact.');
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        id,
-        title,
-        body,
-        tz.TZDateTime.from(scheduledTime, tz.local),
-        const NotificationDetails(
+        tzTime,
+        NotificationDetails(
           android: AndroidNotificationDetails(
             'butler_reminders_channel_v2',
             'Butler Reminders',
+            channelDescription: 'Notifications for your Butler Lee reminders',
             importance: Importance.max,
             priority: Priority.max,
-            fullScreenIntent: true,
+            playSound: true,
+            enableVibration: true,
+            vibrationPattern: Int64List.fromList([0, 500, 500, 500]),
+            colorized: true,
+            color: const Color.fromARGB(255, 0, 122, 255),
           ),
-          iOS: DarwinNotificationDetails(),
+          iOS: const DarwinNotificationDetails(
+            sound: 'default',
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
         ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+
+      debugPrint('Notification [$id] scheduled successfully');
+    } catch (e, stackTrace) {
+      debugPrint('Error scheduling notification [$id]: $e');
+      debugPrint('Stack trace: $stackTrace');
+
+      // Fallback: show immediately if scheduling fails
+      await showNotificationImmediately(
+        id: id,
+        title: title,
+        body: body,
       );
     }
   }
+
+  Future<void> showNotificationImmediately({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    await flutterLocalNotificationsPlugin.show(
+      id,
+      title,
+      body,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'butler_reminders_channel_v2',
+          'Butler Reminders',
+          importance: Importance.max,
+          priority: Priority.high,
+          playSound: true,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
+  }
+
+  // Future<void> scheduleNotification({
+  //   required int id,
+  //   required String title,
+  //   required String body,
+  //   required DateTime scheduledTime,
+  // }) async {
+  //   // If time is now or past, show immediately using show()
+  //   if (scheduledTime.difference(DateTime.now()).inSeconds < 5) {
+  //     await flutterLocalNotificationsPlugin.show(
+  //       id,
+  //       title,
+  //       body,
+  //       const NotificationDetails(
+  //         android: AndroidNotificationDetails(
+  //           'butler_reminders_channel',
+  //           'Butler Reminders',
+  //           channelDescription: 'Notifications for your Butler Lee reminders',
+  //           importance: Importance.max,
+  //           priority: Priority.high,
+  //         ),
+  //         iOS: DarwinNotificationDetails(),
+  //       ),
+  //     );
+  //     return;
+  //   }
+
+  //   debugPrint(
+  //       'Scheduling regular notification [$id]: "$title" at ${scheduledTime.toLocal()} (Exact)');
+
+  //   try {
+  //     final tzTime = tz.TZDateTime.from(scheduledTime, tz.local);
+  //     debugPrint('Converting to TZ Time: $tzTime (Timezone: ${tz.local.name})');
+
+  //     await flutterLocalNotificationsPlugin.zonedSchedule(
+  //       id,
+  //       title,
+  //       body,
+  //       tzTime,
+  //       const NotificationDetails(
+  //         android: AndroidNotificationDetails(
+  //           'butler_reminders_channel_v2', // Changed ID to force update
+  //           'Butler Reminders',
+  //           channelDescription: 'Notifications for your Butler Lee reminders',
+  //           importance: Importance.max,
+  //           priority: Priority.max, // Upgraded from high to max
+  //           fullScreenIntent: true, // Enable full screen intent
+  //         ),
+  //         iOS: DarwinNotificationDetails(),
+  //       ),
+  //       androidScheduleMode:
+  //           AndroidScheduleMode.exactAllowWhileIdle, // Ensure EXACT
+  //       uiLocalNotificationDateInterpretation:
+  //           UILocalNotificationDateInterpretation.absoluteTime,
+  //     );
+  //   } catch (e) {
+  //     debugPrint(
+  //         'Error scheduling exact notification [$id]: $e. Falling back to inexact.');
+  //     await flutterLocalNotificationsPlugin.zonedSchedule(
+  //       id,
+  //       title,
+  //       body,
+  //       tz.TZDateTime.from(scheduledTime, tz.local),
+  //       const NotificationDetails(
+  //         android: AndroidNotificationDetails(
+  //           'butler_reminders_channel_v2',
+  //           'Butler Reminders',
+  //           importance: Importance.max,
+  //           priority: Priority.max,
+  //           fullScreenIntent: true,
+  //         ),
+  //         iOS: DarwinNotificationDetails(),
+  //       ),
+  //       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+  //       uiLocalNotificationDateInterpretation:
+  //           UILocalNotificationDateInterpretation.absoluteTime,
+  //     );
+  //   }
+  // }
 
   Future<void> scheduleHydrationReminder(DateTime scheduledTime) async {
     if (scheduledTime.isBefore(DateTime.now())) return;
@@ -378,6 +504,49 @@ class NotificationService {
 
   Future<void> cancelNotification(int id) async {
     await flutterLocalNotificationsPlugin.cancel(id);
+  }
+
+  Future<void> showTestNotification() async {
+    debugPrint('Showing test notification...');
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'butler_reminders_channel_v2',
+      'Butler Reminders',
+      channelDescription: 'Notifications for your Butler Lee reminders',
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'ticker',
+    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      999,
+      'Test Notification',
+      'This is a test notification from Butler Lee',
+      platformChannelSpecifics,
+      payload: 'test',
+    );
+  }
+
+  Future<String> debugPermissions() async {
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    final bool? notificationsGranted =
+        await androidImplementation?.areNotificationsEnabled();
+    final bool? exactAlarmsGranted =
+        await androidImplementation?.requestExactAlarmsPermission();
+    // Note: requestExactAlarmsPermission returns success? No, it requests.
+    // There isn't a simple "canScheduleExactAlarms" getter exposed in this version of the plugin easily without platform channel check,
+    // but looking at 'requestExactAlarmsPermission', it usually opens settings if needed.
+    // Let's just return what we know.
+
+    final now = tz.TZDateTime.now(tz.local);
+    return 'Notifications Enabled: $notificationsGranted\n'
+        'Exact Alarms Requested: True\n'
+        'Timezone: ${tz.local.name}\n'
+        'App Local Time: $now';
   }
 
   Future<void> cancelAll() async {

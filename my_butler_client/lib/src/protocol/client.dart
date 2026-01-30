@@ -115,6 +115,27 @@ class EndpointAuth extends _i1.EndpointRef {
         'updateProfileImage',
         {'profileImageUrl': profileImageUrl},
       );
+
+  /// Check if an email exists in the system
+  _i2.Future<bool> checkEmailExists(String email) =>
+      caller.callServerEndpoint<bool>(
+        'auth',
+        'checkEmailExists',
+        {'email': email},
+      );
+
+  /// Reset password for a given email (Direct Mode - Security Risk)
+  _i2.Future<bool> resetPassword(
+    String email,
+    String newPassword,
+  ) => caller.callServerEndpoint<bool>(
+    'auth',
+    'resetPassword',
+    {
+      'email': email,
+      'newPassword': newPassword,
+    },
+  );
 }
 
 /// {@category Endpoint}

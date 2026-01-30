@@ -47,6 +47,135 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _showForgotPasswordFlow(BuildContext context) async {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    final authProvider = context.read<AuthProvider>();
+
+    // Step 1: Request Email
+    final email = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter your email address to check if it exists.'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.pop(context, emailController.text.trim()),
+            child: const Text('Next'),
+          ),
+        ],
+      ),
+    );
+
+    if (email == null || email.isEmpty) return;
+
+    // Check if email exists
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Checking email...')),
+    );
+
+    final exists = await authProvider.checkEmailExists(email);
+
+    if (!mounted) return;
+    if (!exists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Email not found.'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    // Step 2: Request New Password (Direct Reset)
+    final password = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        bool obscureText = true;
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            title: const Text('Set New Password'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('User found for $email.\nEnter your new password.'),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'New Password',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(obscureText
+                          ? Icons.visibility_off
+                          : Icons.visibility),
+                      onPressed: () =>
+                          setState(() => obscureText = !obscureText),
+                    ),
+                  ),
+                  obscureText: obscureText,
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () =>
+                    Navigator.pop(context, passwordController.text),
+                child: const Text('Reset Password'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (password == null || password.isEmpty) return;
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Resetting password...')),
+    );
+
+    final success = await authProvider.resetPassword(email, password);
+
+    if (!mounted) return;
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Password reset successfully! Please login.'),
+            backgroundColor: Colors.green),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Failed to reset password. Try again.'),
+            backgroundColor: Colors.red),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,6 +286,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
+
+                  // Forgot Password Button
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => _showForgotPasswordFlow(context),
+                      child: const Text('Forgot Password?'),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
                   // Login Button
                   FilledButton(

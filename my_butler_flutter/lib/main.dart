@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(
             client: Client(
-              'http://136.119.74.168:8080/',
+              'http://136.115.115.200:8080/',
               authenticationKeyManager: FlutterAuthenticationKeyManager(),
               connectionTimeout: const Duration(seconds: 20),
             )..connectivityMonitor = FlutterConnectivityMonitor(),

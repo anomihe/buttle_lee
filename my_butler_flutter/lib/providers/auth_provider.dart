@@ -188,6 +188,26 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// Check if email exists
+  Future<bool> checkEmailExists(String email) async {
+    try {
+      return await client.auth.checkEmailExists(email);
+    } catch (e) {
+      debugPrint('Error checking email: $e');
+      return false;
+    }
+  }
+
+  /// Reset password (Direct)
+  Future<bool> resetPassword(String email, String newPassword) async {
+    try {
+      return await client.auth.resetPassword(email, newPassword);
+    } catch (e) {
+      debugPrint('Error resetting password: $e');
+      return false;
+    }
+  }
+
   /// Logout
   Future<void> logout() async {
     // Clear the stored authentication key

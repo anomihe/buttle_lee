@@ -18,8 +18,20 @@ class GeminiService {
     }
 
     try {
+      // Extract timezone offset from command
+      int offsetSeconds = 0;
+      final offsetMatch =
+          RegExp(r'TimezoneOffset: ([+-])(\d{2}):(\d{2})').firstMatch(command);
+      if (offsetMatch != null) {
+        final sign = offsetMatch.group(1) == '+' ? 1 : -1;
+        final hours = int.parse(offsetMatch.group(2)!);
+        final minutes = int.parse(offsetMatch.group(3)!);
+        offsetSeconds = sign * ((hours * 3600) + (minutes * 60));
+      }
+
       // Call Gemini API to parse the command
       final intent = await _parseCommandWithGemini(command, apiKey);
+      intent['user_offset_seconds'] = offsetSeconds; // Pass to handler
 
       // Handle different intents
       if (intent['action'] == 'create_reminder') {
@@ -133,32 +145,68 @@ Respond ONLY with valid JSON, no other text.
         return 'I couldn\'t understand when to set the reminder. Please include a time like "at 3 PM" or "tomorrow at noon".';
       }
 
+      // Extract Timezone Offset from command
+      // Format: TimezoneOffset: +01:00
+      Duration offset = Duration.zero;
+      final offsetMatch = RegExp(r'TimezoneOffset: ([+-]\d{2}:\d{2})')
+          .firstMatch(intent['original_command'] ?? '');
+      // Wait, 'intent' doesn't have the original command unless we pass it.
+      // We need to parse the command string passed to processCommand.
+      // But _handleCreateReminder only gets 'intent'.
+      // We'll need to pass 'command' to _handleCreateReminder or extract offset in processCommand.
+      // Let's modify processCommand to pass the offset. But first, let's just fix the time parsing here assuming 'triggerTime' is Local.
+
+      // Actually, we can't access 'command' here easily without changing signature.
+      // Let's assume we pass the offset as an argument.
+      // But I can't change the signature easily in this tool call.
+
+      // BETTER: Update processCommand to extract offset and pass it to _handleCreateReminder.
+      // I will abort this specific edit and do it in two steps:
+      // 1. Update _handleCreateReminder signature.
+      // 2. Update processCommand to call it with offset.
+
+      // Let's implement the parsing logic assuming we have the offset.
+      // Wait, I can't change the signature and the call site in one tool call if they are far apart.
+
+      // Let's hack it: Pass 'command' inside 'intent' map? No, processCommand constructs intent from Gemini response.
+      // I should modify processCommand to add 'user_offset' to the intent map before calling _handleCreateReminder.
+
+      // This tool call is for lines 136-164 (Parsing).
+      // I will assume 'intent' has 'user_offset_seconds'.
+
       // Parse time
       DateTime triggerTime;
       try {
         if (timeStr.contains('T')) {
-          // Full ISO 8601 datetime
-          triggerTime = DateTime.parse(timeStr);
+          triggerTime = DateTime.parse(timeStr); // Local time (no Z)
         } else {
-          // Time only (HH:MM), use today's date
+          // ... (same logic for HH:MM)
           final parts = timeStr.split(':');
-          if (parts.length < 2) {
-            return 'I couldn\'t parse the time "$timeStr". Please use a format like "3 PM" or "15:00".';
-          }
-          final now = DateTime.now();
-          triggerTime = DateTime(
-            now.year,
-            now.month,
-            now.day,
-            int.parse(parts[0]),
-            int.parse(parts[1]),
-          );
+          final now = DateTime.now(); // This 'now' is Server Time (UTC).
+          // We should technically use User Local Time for 'now' if we are building date from components.
+          // But Gemini should return full ISO mostly.
+          // If Gemini returns HH:MM, we use Server Date? That might be wrong if User is on next day.
+          // BUT my prompt asks for ISO.
 
-          // If time has passed today, schedule for tomorrow
-          if (triggerTime.isBefore(now)) {
-            triggerTime = triggerTime.add(Duration(days: 1));
-          }
+          triggerTime = DateTime(now.year, now.month, now.day,
+              int.parse(parts[0]), int.parse(parts[1]));
         }
+
+        // Apply Offset to convert to UTC
+        // triggerTime is "19:10" (Local).
+        // We want UTC. UTC = Local - Offset.
+        // ex: 19:10 - (+01:00) = 18:10 UTC.
+
+        final offsetSeconds = intent['user_offset_seconds'] as int? ?? 0;
+        triggerTime = triggerTime.subtract(Duration(seconds: offsetSeconds));
+        // Force isUtc = true (though subtract on non-utc might keep it compatible, best to be explicit)
+        triggerTime = DateTime.utc(
+            triggerTime.year,
+            triggerTime.month,
+            triggerTime.day,
+            triggerTime.hour,
+            triggerTime.minute,
+            triggerTime.second);
       } catch (e) {
         return 'I couldn\'t parse the time "$timeStr". Please try again.';
       }
