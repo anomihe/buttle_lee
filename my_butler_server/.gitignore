@@ -13,3 +13,8 @@ config/passwords.yaml
 
 # Firebase service account key for Firebase auth
 config/firebase_service_account_key.json
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
