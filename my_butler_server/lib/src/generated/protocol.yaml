@@ -11,8 +11,14 @@ auth:
   - resetPassword:
 book:
   - addBook:
+  - addBookWithChapters:
   - getBooks:
+  - getChapters:
   - finishBook:
+  - completeBook:
+  - updateLessons:
+  - completeChapter:
+  - uncompleteChapter:
 household:
   - createHousehold:
   - joinHousehold:

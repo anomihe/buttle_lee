@@ -7,3 +7,5 @@ fields:
   status: int # 0: Reading, 1: Finished
   startedDate: DateTime
   finishedDate: DateTime?
+  lessonsLearned: String?
+  isCompleted: bool, default=false

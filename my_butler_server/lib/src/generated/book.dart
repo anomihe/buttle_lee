@@ -21,7 +21,9 @@ abstract class Book implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     required this.status,
     required this.startedDate,
     this.finishedDate,
-  });
+    this.lessonsLearned,
+    bool? isCompleted,
+  }) : isCompleted = isCompleted ?? false;
 
   factory Book({
     int? id,
@@ -31,6 +33,8 @@ abstract class Book implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     required int status,
     required DateTime startedDate,
     DateTime? finishedDate,
+    String? lessonsLearned,
+    bool? isCompleted,
   }) = _BookImpl;
 
   factory Book.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -48,6 +52,8 @@ abstract class Book implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
           : _i1.DateTimeJsonExtension.fromJson(
               jsonSerialization['finishedDate'],
             ),
+      lessonsLearned: jsonSerialization['lessonsLearned'] as String?,
+      isCompleted: jsonSerialization['isCompleted'] as bool?,
     );
   }
 
@@ -70,6 +76,10 @@ abstract class Book implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
 
   DateTime? finishedDate;
 
+  String? lessonsLearned;
+
+  bool isCompleted;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -84,6 +94,8 @@ abstract class Book implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     int? status,
     DateTime? startedDate,
     DateTime? finishedDate,
+    String? lessonsLearned,
+    bool? isCompleted,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -96,6 +108,8 @@ abstract class Book implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       'status': status,
       'startedDate': startedDate.toJson(),
       if (finishedDate != null) 'finishedDate': finishedDate?.toJson(),
+      if (lessonsLearned != null) 'lessonsLearned': lessonsLearned,
+      'isCompleted': isCompleted,
     };
   }
 
@@ -110,6 +124,8 @@ abstract class Book implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       'status': status,
       'startedDate': startedDate.toJson(),
       if (finishedDate != null) 'finishedDate': finishedDate?.toJson(),
+      if (lessonsLearned != null) 'lessonsLearned': lessonsLearned,
+      'isCompleted': isCompleted,
     };
   }
 
@@ -154,6 +170,8 @@ class _BookImpl extends Book {
     required int status,
     required DateTime startedDate,
     DateTime? finishedDate,
+    String? lessonsLearned,
+    bool? isCompleted,
   }) : super._(
          id: id,
          userId: userId,
@@ -162,6 +180,8 @@ class _BookImpl extends Book {
          status: status,
          startedDate: startedDate,
          finishedDate: finishedDate,
+         lessonsLearned: lessonsLearned,
+         isCompleted: isCompleted,
        );
 
   /// Returns a shallow copy of this [Book]
@@ -176,6 +196,8 @@ class _BookImpl extends Book {
     int? status,
     DateTime? startedDate,
     Object? finishedDate = _Undefined,
+    Object? lessonsLearned = _Undefined,
+    bool? isCompleted,
   }) {
     return Book(
       id: id is int? ? id : this.id,
@@ -187,6 +209,10 @@ class _BookImpl extends Book {
       finishedDate: finishedDate is DateTime?
           ? finishedDate
           : this.finishedDate,
+      lessonsLearned: lessonsLearned is String?
+          ? lessonsLearned
+          : this.lessonsLearned,
+      isCompleted: isCompleted ?? this.isCompleted,
     );
   }
 }
@@ -225,6 +251,17 @@ class BookUpdateTable extends _i1.UpdateTable<BookTable> {
         table.finishedDate,
         value,
       );
+
+  _i1.ColumnValue<String, String> lessonsLearned(String? value) =>
+      _i1.ColumnValue(
+        table.lessonsLearned,
+        value,
+      );
+
+  _i1.ColumnValue<bool, bool> isCompleted(bool value) => _i1.ColumnValue(
+    table.isCompleted,
+    value,
+  );
 }
 
 class BookTable extends _i1.Table<int?> {
@@ -254,6 +291,15 @@ class BookTable extends _i1.Table<int?> {
       'finishedDate',
       this,
     );
+    lessonsLearned = _i1.ColumnString(
+      'lessonsLearned',
+      this,
+    );
+    isCompleted = _i1.ColumnBool(
+      'isCompleted',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final BookUpdateTable updateTable;
@@ -270,6 +316,10 @@ class BookTable extends _i1.Table<int?> {
 
   late final _i1.ColumnDateTime finishedDate;
 
+  late final _i1.ColumnString lessonsLearned;
+
+  late final _i1.ColumnBool isCompleted;
+
   @override
   List<_i1.Column> get columns => [
     id,
@@ -279,6 +329,8 @@ class BookTable extends _i1.Table<int?> {
     status,
     startedDate,
     finishedDate,
+    lessonsLearned,
+    isCompleted,
   ];
 }
 

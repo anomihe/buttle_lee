@@ -1,0 +1,8 @@
+class: Chapter
+table: chapter
+fields:
+  bookId: int
+  title: String
+  chapterOrder: int
+  isCompleted: bool, default=false
+  completedAt: DateTime?

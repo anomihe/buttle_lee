@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:confetti/confetti.dart';
 import 'dart:ui';
 import '../providers/book_provider.dart';
+import 'book_detail_sheet.dart';
 
 class ReadingTrackerSheet extends StatefulWidget {
   const ReadingTrackerSheet({super.key});
@@ -37,11 +38,6 @@ class _ReadingTrackerSheetState extends State<ReadingTrackerSheet> {
       backgroundColor: Colors.transparent,
       builder: (context) => _AddBookBottomSheet(),
     );
-  }
-
-  void _handleFinishBook(int id) async {
-    _confettiController.play();
-    await context.read<BookProvider>().finishBook(id);
   }
 
   @override
@@ -211,66 +207,84 @@ class _ReadingTrackerSheetState extends State<ReadingTrackerSheet> {
                               ),
                             ],
                           ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            leading: Container(
-                              width: 48,
-                              height: 64,
-                              decoration: BoxDecoration(
-                                color: primaryColor,
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: primaryColor.withOpacity(0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        BookDetailSheet(book: book),
                                   ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.book_rounded,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            ),
-                            title: Text(
-                              book.title,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: isDark ? Colors.white : Colors.black87,
-                              ),
-                            ),
-                            subtitle: Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                book.author,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color:
-                                      isDark ? Colors.white60 : Colors.black54,
-                                ),
-                              ),
-                            ),
-                            trailing: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () => _handleFinishBook(book.id!),
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Icon(
-                                    Icons.check_circle_rounded,
-                                    color: Colors.green,
-                                    size: 28,
-                                  ),
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(16),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 48,
+                                      height: 64,
+                                      decoration: BoxDecoration(
+                                        color: primaryColor,
+                                        borderRadius: BorderRadius.circular(8),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                primaryColor.withOpacity(0.3),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Icon(
+                                        Icons.book_rounded,
+                                        color: Colors.white,
+                                        size: 28,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            book.title,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : Colors.black87,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            book.author,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: isDark
+                                                  ? Colors.white60
+                                                  : Colors.black54,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.chevron_right_rounded,
+                                      color: isDark
+                                          ? Colors.white38
+                                          : Colors.black38,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -316,19 +330,50 @@ class _AddBookBottomSheetState extends State<_AddBookBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _authorController = TextEditingController();
+  final List<TextEditingController> _chapterControllers = [];
+  bool _showChapters = false;
 
   @override
   void dispose() {
     _titleController.dispose();
     _authorController.dispose();
+    for (var controller in _chapterControllers) {
+      controller.dispose();
+    }
     super.dispose();
+  }
+
+  void _addChapterField() {
+    setState(() {
+      _chapterControllers.add(TextEditingController());
+    });
+  }
+
+  void _removeChapterField(int index) {
+    setState(() {
+      _chapterControllers[index].dispose();
+      _chapterControllers.removeAt(index);
+    });
   }
 
   void _handleAddBook() async {
     if (_formKey.currentState!.validate()) {
-      await context
-          .read<BookProvider>()
-          .addBook(_titleController.text, _authorController.text);
+      final chapterTitles = _chapterControllers
+          .map((c) => c.text)
+          .where((text) => text.isNotEmpty)
+          .toList();
+
+      if (chapterTitles.isNotEmpty) {
+        await context.read<BookProvider>().addBookWithChapters(
+              _titleController.text,
+              _authorController.text,
+              chapterTitles,
+            );
+      } else {
+        await context
+            .read<BookProvider>()
+            .addBook(_titleController.text, _authorController.text);
+      }
 
       if (mounted) {
         Navigator.pop(context);
@@ -518,6 +563,121 @@ class _AddBookBottomSheetState extends State<_AddBookBottomSheet> {
                       : null,
                 ),
                 const SizedBox(height: 24),
+
+                // Chapters Section
+                Row(
+                  children: [
+                    Text(
+                      'Chapters (Optional)',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const Spacer(),
+                    TextButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _showChapters = !_showChapters;
+                          if (_showChapters && _chapterControllers.isEmpty) {
+                            _addChapterField();
+                          }
+                        });
+                      },
+                      icon: Icon(
+                        _showChapters
+                            ? Icons.expand_less_rounded
+                            : Icons.expand_more_rounded,
+                        size: 20,
+                      ),
+                      label: Text(_showChapters ? 'Hide' : 'Add Chapters'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+
+                if (_showChapters) ...[
+                  const SizedBox(height: 12),
+                  ...List.generate(_chapterControllers.length, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _chapterControllers[index],
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Chapter ${index + 1} title',
+                                hintStyle: TextStyle(
+                                  color: isDark
+                                      ? Colors.white.withOpacity(0.3)
+                                      : Colors.black.withOpacity(0.3),
+                                ),
+                                filled: true,
+                                fillColor: isDark
+                                    ? Colors.white.withOpacity(0.05)
+                                    : Colors.grey.withOpacity(0.05),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: isDark
+                                        ? Colors.white.withOpacity(0.1)
+                                        : Colors.grey.withOpacity(0.2),
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: isDark
+                                        ? Colors.white.withOpacity(0.1)
+                                        : Colors.grey.withOpacity(0.2),
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: primaryColor,
+                                    width: 2,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            onPressed: () => _removeChapterField(index),
+                            icon: const Icon(Icons.remove_circle_outline),
+                            color: Colors.red,
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                  OutlinedButton.icon(
+                    onPressed: _addChapterField,
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: const Text('Add Chapter'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: primaryColor,
+                      side: BorderSide(color: primaryColor.withOpacity(0.5)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                const SizedBox(height: 8),
 
                 // Start Reading Button
                 SizedBox(

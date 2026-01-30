@@ -16,13 +16,14 @@ import 'package:serverpod/serverpod.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:my_butler_server/src/generated/user_profile.dart' as _i4;
 import 'package:my_butler_server/src/generated/book.dart' as _i5;
-import 'package:my_butler_server/src/generated/household.dart' as _i6;
-import 'package:my_butler_server/src/generated/shared_routine.dart' as _i7;
-import 'package:my_butler_server/src/generated/butler_reminder.dart' as _i8;
-import 'package:my_butler_server/src/generated/reminder_type.dart' as _i9;
-import 'package:my_butler_server/src/generated/priority.dart' as _i10;
-import 'package:my_butler_server/src/generated/greeting.dart' as _i11;
-import 'package:my_butler_server/src/generated/future_calls.dart' as _i12;
+import 'package:my_butler_server/src/generated/chapter.dart' as _i6;
+import 'package:my_butler_server/src/generated/household.dart' as _i7;
+import 'package:my_butler_server/src/generated/shared_routine.dart' as _i8;
+import 'package:my_butler_server/src/generated/butler_reminder.dart' as _i9;
+import 'package:my_butler_server/src/generated/reminder_type.dart' as _i10;
+import 'package:my_butler_server/src/generated/priority.dart' as _i11;
+import 'package:my_butler_server/src/generated/greeting.dart' as _i12;
+import 'package:my_butler_server/src/generated/future_calls.dart' as _i13;
 import 'package:my_butler_server/src/generated/protocol.dart';
 import 'package:my_butler_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -535,6 +536,43 @@ class _BookEndpoint {
     });
   }
 
+  _i3.Future<_i5.Book?> addBookWithChapters(
+    _i1.TestSessionBuilder sessionBuilder,
+    String title,
+    String author,
+    List<String> chapterTitles,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'book',
+            method: 'addBookWithChapters',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'book',
+          methodName: 'addBookWithChapters',
+          parameters: _i1.testObjectToJson({
+            'title': title,
+            'author': author,
+            'chapterTitles': chapterTitles,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i5.Book?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<List<_i5.Book>> getBooks(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
@@ -558,6 +596,37 @@ class _BookEndpoint {
                   _localCallContext.arguments,
                 )
                 as _i3.Future<List<_i5.Book>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i6.Chapter>> getChapters(
+    _i1.TestSessionBuilder sessionBuilder,
+    int bookId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'book',
+            method: 'getChapters',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'book',
+          methodName: 'getChapters',
+          parameters: _i1.testObjectToJson({'bookId': bookId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i6.Chapter>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -595,6 +664,138 @@ class _BookEndpoint {
       }
     });
   }
+
+  _i3.Future<void> completeBook(
+    _i1.TestSessionBuilder sessionBuilder,
+    int bookId,
+    String? lessonsLearned,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'book',
+            method: 'completeBook',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'book',
+          methodName: 'completeBook',
+          parameters: _i1.testObjectToJson({
+            'bookId': bookId,
+            'lessonsLearned': lessonsLearned,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<void> updateLessons(
+    _i1.TestSessionBuilder sessionBuilder,
+    int bookId,
+    String lessonsLearned,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'book',
+            method: 'updateLessons',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'book',
+          methodName: 'updateLessons',
+          parameters: _i1.testObjectToJson({
+            'bookId': bookId,
+            'lessonsLearned': lessonsLearned,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<void> completeChapter(
+    _i1.TestSessionBuilder sessionBuilder,
+    int chapterId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'book',
+            method: 'completeChapter',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'book',
+          methodName: 'completeChapter',
+          parameters: _i1.testObjectToJson({'chapterId': chapterId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<void> uncompleteChapter(
+    _i1.TestSessionBuilder sessionBuilder,
+    int chapterId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'book',
+            method: 'uncompleteChapter',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'book',
+          methodName: 'uncompleteChapter',
+          parameters: _i1.testObjectToJson({'chapterId': chapterId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _HouseholdEndpoint {
@@ -607,7 +808,7 @@ class _HouseholdEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i6.Household?> createHousehold(
+  _i3.Future<_i7.Household?> createHousehold(
     _i1.TestSessionBuilder sessionBuilder,
     String name,
   ) async {
@@ -630,7 +831,7 @@ class _HouseholdEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i6.Household?>);
+                as _i3.Future<_i7.Household?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -700,7 +901,7 @@ class _HouseholdEndpoint {
     });
   }
 
-  _i3.Future<List<_i6.Household>> getMyHouseholds(
+  _i3.Future<List<_i7.Household>> getMyHouseholds(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -722,7 +923,7 @@ class _HouseholdEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i6.Household>>);
+                as _i3.Future<List<_i7.Household>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -895,7 +1096,7 @@ class _HouseholdEndpoint {
     });
   }
 
-  _i3.Future<List<_i7.SharedRoutine>> getSharedRoutines(
+  _i3.Future<List<_i8.SharedRoutine>> getSharedRoutines(
     _i1.TestSessionBuilder sessionBuilder,
     int householdId,
   ) async {
@@ -918,7 +1119,7 @@ class _HouseholdEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i7.SharedRoutine>>);
+                as _i3.Future<List<_i8.SharedRoutine>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -937,12 +1138,12 @@ class _ReminderEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i8.ButlerReminder?> createReminder(
+  _i3.Future<_i9.ButlerReminder?> createReminder(
     _i1.TestSessionBuilder sessionBuilder,
     String description,
     DateTime triggerTime,
-    _i9.ReminderType reminderType, {
-    required _i10.Priority priority,
+    _i10.ReminderType reminderType, {
+    required _i11.Priority priority,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -968,7 +1169,7 @@ class _ReminderEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i8.ButlerReminder?>);
+                as _i3.Future<_i9.ButlerReminder?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -976,7 +1177,7 @@ class _ReminderEndpoint {
     });
   }
 
-  _i3.Future<List<_i8.ButlerReminder>> getUserReminders(
+  _i3.Future<List<_i9.ButlerReminder>> getUserReminders(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -998,7 +1199,7 @@ class _ReminderEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i8.ButlerReminder>>);
+                as _i3.Future<List<_i9.ButlerReminder>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1006,7 +1207,7 @@ class _ReminderEndpoint {
     });
   }
 
-  _i3.Future<List<_i8.ButlerReminder>> getCompletedReminders(
+  _i3.Future<List<_i9.ButlerReminder>> getCompletedReminders(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -1028,7 +1229,7 @@ class _ReminderEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i8.ButlerReminder>>);
+                as _i3.Future<List<_i9.ButlerReminder>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1036,7 +1237,7 @@ class _ReminderEndpoint {
     });
   }
 
-  _i3.Future<List<_i8.ButlerReminder>> getUpcomingReminders(
+  _i3.Future<List<_i9.ButlerReminder>> getUpcomingReminders(
     _i1.TestSessionBuilder sessionBuilder,
     DateTime startTime,
     DateTime endTime,
@@ -1063,7 +1264,7 @@ class _ReminderEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i8.ButlerReminder>>);
+                as _i3.Future<List<_i9.ButlerReminder>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1071,13 +1272,13 @@ class _ReminderEndpoint {
     });
   }
 
-  _i3.Future<_i8.ButlerReminder?> updateReminder(
+  _i3.Future<_i9.ButlerReminder?> updateReminder(
     _i1.TestSessionBuilder sessionBuilder,
     int reminderId,
     String? description,
     DateTime? triggerTime,
-    _i9.ReminderType? reminderType, {
-    _i10.Priority? priority,
+    _i10.ReminderType? reminderType, {
+    _i11.Priority? priority,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1104,7 +1305,7 @@ class _ReminderEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i8.ButlerReminder?>);
+                as _i3.Future<_i9.ButlerReminder?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1143,7 +1344,7 @@ class _ReminderEndpoint {
     });
   }
 
-  _i3.Future<_i8.ButlerReminder?> snoozeReminder(
+  _i3.Future<_i9.ButlerReminder?> snoozeReminder(
     _i1.TestSessionBuilder sessionBuilder,
     int reminderId,
     DateTime snoozeUntil,
@@ -1170,7 +1371,7 @@ class _ReminderEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i8.ButlerReminder?>);
+                as _i3.Future<_i9.ButlerReminder?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1380,7 +1581,7 @@ class _GreetingEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i11.Greeting> hello(
+  _i3.Future<_i12.Greeting> hello(
     _i1.TestSessionBuilder sessionBuilder,
     String name,
   ) async {
@@ -1403,7 +1604,7 @@ class _GreetingEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i11.Greeting>);
+                as _i3.Future<_i12.Greeting>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1420,7 +1621,7 @@ class _ReminderExecutionCallFutureCall {
     var _localUniqueSession = (sessionBuilder as _i1.InternalTestSessionBuilder)
         .internalBuild();
     try {
-      await _i12.ReminderExecutionCallInvokeFutureCall().invoke(
+      await _i13.ReminderExecutionCallInvokeFutureCall().invoke(
         _localUniqueSession,
         object,
       );

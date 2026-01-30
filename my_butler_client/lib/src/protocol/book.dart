@@ -21,7 +21,9 @@ abstract class Book implements _i1.SerializableModel {
     required this.status,
     required this.startedDate,
     this.finishedDate,
-  });
+    this.lessonsLearned,
+    bool? isCompleted,
+  }) : isCompleted = isCompleted ?? false;
 
   factory Book({
     int? id,
@@ -31,6 +33,8 @@ abstract class Book implements _i1.SerializableModel {
     required int status,
     required DateTime startedDate,
     DateTime? finishedDate,
+    String? lessonsLearned,
+    bool? isCompleted,
   }) = _BookImpl;
 
   factory Book.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -48,6 +52,8 @@ abstract class Book implements _i1.SerializableModel {
           : _i1.DateTimeJsonExtension.fromJson(
               jsonSerialization['finishedDate'],
             ),
+      lessonsLearned: jsonSerialization['lessonsLearned'] as String?,
+      isCompleted: jsonSerialization['isCompleted'] as bool?,
     );
   }
 
@@ -68,6 +74,10 @@ abstract class Book implements _i1.SerializableModel {
 
   DateTime? finishedDate;
 
+  String? lessonsLearned;
+
+  bool isCompleted;
+
   /// Returns a shallow copy of this [Book]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -79,6 +89,8 @@ abstract class Book implements _i1.SerializableModel {
     int? status,
     DateTime? startedDate,
     DateTime? finishedDate,
+    String? lessonsLearned,
+    bool? isCompleted,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -91,6 +103,8 @@ abstract class Book implements _i1.SerializableModel {
       'status': status,
       'startedDate': startedDate.toJson(),
       if (finishedDate != null) 'finishedDate': finishedDate?.toJson(),
+      if (lessonsLearned != null) 'lessonsLearned': lessonsLearned,
+      'isCompleted': isCompleted,
     };
   }
 
@@ -111,6 +125,8 @@ class _BookImpl extends Book {
     required int status,
     required DateTime startedDate,
     DateTime? finishedDate,
+    String? lessonsLearned,
+    bool? isCompleted,
   }) : super._(
          id: id,
          userId: userId,
@@ -119,6 +135,8 @@ class _BookImpl extends Book {
          status: status,
          startedDate: startedDate,
          finishedDate: finishedDate,
+         lessonsLearned: lessonsLearned,
+         isCompleted: isCompleted,
        );
 
   /// Returns a shallow copy of this [Book]
@@ -133,6 +151,8 @@ class _BookImpl extends Book {
     int? status,
     DateTime? startedDate,
     Object? finishedDate = _Undefined,
+    Object? lessonsLearned = _Undefined,
+    bool? isCompleted,
   }) {
     return Book(
       id: id is int? ? id : this.id,
@@ -144,6 +164,10 @@ class _BookImpl extends Book {
       finishedDate: finishedDate is DateTime?
           ? finishedDate
           : this.finishedDate,
+      lessonsLearned: lessonsLearned is String?
+          ? lessonsLearned
+          : this.lessonsLearned,
+      isCompleted: isCompleted ?? this.isCompleted,
     );
   }
 }

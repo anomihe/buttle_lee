@@ -19,20 +19,23 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i5;
 import 'book.dart' as _i6;
 import 'butler_reminder.dart' as _i7;
-import 'greeting.dart' as _i8;
-import 'household.dart' as _i9;
-import 'household_member.dart' as _i10;
-import 'priority.dart' as _i11;
-import 'reminder_type.dart' as _i12;
-import 'shared_routine.dart' as _i13;
-import 'user_profile.dart' as _i14;
-import 'package:my_butler_server/src/generated/book.dart' as _i15;
-import 'package:my_butler_server/src/generated/user_profile.dart' as _i16;
-import 'package:my_butler_server/src/generated/household.dart' as _i17;
-import 'package:my_butler_server/src/generated/shared_routine.dart' as _i18;
-import 'package:my_butler_server/src/generated/butler_reminder.dart' as _i19;
+import 'chapter.dart' as _i8;
+import 'greeting.dart' as _i9;
+import 'household.dart' as _i10;
+import 'household_member.dart' as _i11;
+import 'priority.dart' as _i12;
+import 'reminder_type.dart' as _i13;
+import 'shared_routine.dart' as _i14;
+import 'user_profile.dart' as _i15;
+import 'package:my_butler_server/src/generated/book.dart' as _i16;
+import 'package:my_butler_server/src/generated/chapter.dart' as _i17;
+import 'package:my_butler_server/src/generated/user_profile.dart' as _i18;
+import 'package:my_butler_server/src/generated/household.dart' as _i19;
+import 'package:my_butler_server/src/generated/shared_routine.dart' as _i20;
+import 'package:my_butler_server/src/generated/butler_reminder.dart' as _i21;
 export 'book.dart';
 export 'butler_reminder.dart';
+export 'chapter.dart';
 export 'greeting.dart';
 export 'household.dart';
 export 'household_member.dart';
@@ -97,6 +100,19 @@ class Protocol extends _i1.SerializationManagerServer {
           columnType: _i2.ColumnType.timestampWithoutTimeZone,
           isNullable: true,
           dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'lessonsLearned',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'isCompleted',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
         ),
       ],
       foreignKeys: [],
@@ -185,6 +201,69 @@ class Protocol extends _i1.SerializationManagerServer {
       indexes: [
         _i2.IndexDefinition(
           indexName: 'butler_reminder_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'chapter',
+      dartName: 'Chapter',
+      schema: 'public',
+      module: 'my_butler',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'chapter_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'bookId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'title',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'chapterOrder',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'isCompleted',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _i2.ColumnDefinition(
+          name: 'completedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'chapter_pkey',
           tableSpace: null,
           elements: [
             _i2.IndexElementDefinition(
@@ -646,26 +725,29 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i7.ButlerReminder) {
       return _i7.ButlerReminder.fromJson(data) as T;
     }
-    if (t == _i8.Greeting) {
-      return _i8.Greeting.fromJson(data) as T;
+    if (t == _i8.Chapter) {
+      return _i8.Chapter.fromJson(data) as T;
     }
-    if (t == _i9.Household) {
-      return _i9.Household.fromJson(data) as T;
+    if (t == _i9.Greeting) {
+      return _i9.Greeting.fromJson(data) as T;
     }
-    if (t == _i10.HouseholdMember) {
-      return _i10.HouseholdMember.fromJson(data) as T;
+    if (t == _i10.Household) {
+      return _i10.Household.fromJson(data) as T;
     }
-    if (t == _i11.Priority) {
-      return _i11.Priority.fromJson(data) as T;
+    if (t == _i11.HouseholdMember) {
+      return _i11.HouseholdMember.fromJson(data) as T;
     }
-    if (t == _i12.ReminderType) {
-      return _i12.ReminderType.fromJson(data) as T;
+    if (t == _i12.Priority) {
+      return _i12.Priority.fromJson(data) as T;
     }
-    if (t == _i13.SharedRoutine) {
-      return _i13.SharedRoutine.fromJson(data) as T;
+    if (t == _i13.ReminderType) {
+      return _i13.ReminderType.fromJson(data) as T;
     }
-    if (t == _i14.UserProfile) {
-      return _i14.UserProfile.fromJson(data) as T;
+    if (t == _i14.SharedRoutine) {
+      return _i14.SharedRoutine.fromJson(data) as T;
+    }
+    if (t == _i15.UserProfile) {
+      return _i15.UserProfile.fromJson(data) as T;
     }
     if (t == _i1.getType<_i6.Book?>()) {
       return (data != null ? _i6.Book.fromJson(data) : null) as T;
@@ -673,26 +755,29 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i7.ButlerReminder?>()) {
       return (data != null ? _i7.ButlerReminder.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i8.Greeting?>()) {
-      return (data != null ? _i8.Greeting.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i8.Chapter?>()) {
+      return (data != null ? _i8.Chapter.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i9.Household?>()) {
-      return (data != null ? _i9.Household.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i9.Greeting?>()) {
+      return (data != null ? _i9.Greeting.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i10.HouseholdMember?>()) {
-      return (data != null ? _i10.HouseholdMember.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i10.Household?>()) {
+      return (data != null ? _i10.Household.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i11.Priority?>()) {
-      return (data != null ? _i11.Priority.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i11.HouseholdMember?>()) {
+      return (data != null ? _i11.HouseholdMember.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i12.ReminderType?>()) {
-      return (data != null ? _i12.ReminderType.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i12.Priority?>()) {
+      return (data != null ? _i12.Priority.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i13.SharedRoutine?>()) {
-      return (data != null ? _i13.SharedRoutine.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i13.ReminderType?>()) {
+      return (data != null ? _i13.ReminderType.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i14.UserProfile?>()) {
-      return (data != null ? _i14.UserProfile.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i14.SharedRoutine?>()) {
+      return (data != null ? _i14.SharedRoutine.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i15.UserProfile?>()) {
+      return (data != null ? _i15.UserProfile.fromJson(data) : null) as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
@@ -703,31 +788,35 @@ class Protocol extends _i1.SerializationManagerServer {
           )
           as T;
     }
-    if (t == List<_i15.Book>) {
-      return (data as List).map((e) => deserialize<_i15.Book>(e)).toList() as T;
-    }
-    if (t == List<_i16.UserProfile>) {
-      return (data as List)
-              .map((e) => deserialize<_i16.UserProfile>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_i17.Household>) {
-      return (data as List).map((e) => deserialize<_i17.Household>(e)).toList()
-          as T;
-    }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
-    if (t == List<_i18.SharedRoutine>) {
+    if (t == List<_i16.Book>) {
+      return (data as List).map((e) => deserialize<_i16.Book>(e)).toList() as T;
+    }
+    if (t == List<_i17.Chapter>) {
+      return (data as List).map((e) => deserialize<_i17.Chapter>(e)).toList()
+          as T;
+    }
+    if (t == List<_i18.UserProfile>) {
       return (data as List)
-              .map((e) => deserialize<_i18.SharedRoutine>(e))
+              .map((e) => deserialize<_i18.UserProfile>(e))
               .toList()
           as T;
     }
-    if (t == List<_i19.ButlerReminder>) {
+    if (t == List<_i19.Household>) {
+      return (data as List).map((e) => deserialize<_i19.Household>(e)).toList()
+          as T;
+    }
+    if (t == List<_i20.SharedRoutine>) {
       return (data as List)
-              .map((e) => deserialize<_i19.ButlerReminder>(e))
+              .map((e) => deserialize<_i20.SharedRoutine>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i21.ButlerReminder>) {
+      return (data as List)
+              .map((e) => deserialize<_i21.ButlerReminder>(e))
               .toList()
           as T;
     }
@@ -750,13 +839,14 @@ class Protocol extends _i1.SerializationManagerServer {
     return switch (type) {
       _i6.Book => 'Book',
       _i7.ButlerReminder => 'ButlerReminder',
-      _i8.Greeting => 'Greeting',
-      _i9.Household => 'Household',
-      _i10.HouseholdMember => 'HouseholdMember',
-      _i11.Priority => 'Priority',
-      _i12.ReminderType => 'ReminderType',
-      _i13.SharedRoutine => 'SharedRoutine',
-      _i14.UserProfile => 'UserProfile',
+      _i8.Chapter => 'Chapter',
+      _i9.Greeting => 'Greeting',
+      _i10.Household => 'Household',
+      _i11.HouseholdMember => 'HouseholdMember',
+      _i12.Priority => 'Priority',
+      _i13.ReminderType => 'ReminderType',
+      _i14.SharedRoutine => 'SharedRoutine',
+      _i15.UserProfile => 'UserProfile',
       _ => null,
     };
   }
@@ -775,19 +865,21 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'Book';
       case _i7.ButlerReminder():
         return 'ButlerReminder';
-      case _i8.Greeting():
+      case _i8.Chapter():
+        return 'Chapter';
+      case _i9.Greeting():
         return 'Greeting';
-      case _i9.Household():
+      case _i10.Household():
         return 'Household';
-      case _i10.HouseholdMember():
+      case _i11.HouseholdMember():
         return 'HouseholdMember';
-      case _i11.Priority():
+      case _i12.Priority():
         return 'Priority';
-      case _i12.ReminderType():
+      case _i13.ReminderType():
         return 'ReminderType';
-      case _i13.SharedRoutine():
+      case _i14.SharedRoutine():
         return 'SharedRoutine';
-      case _i14.UserProfile():
+      case _i15.UserProfile():
         return 'UserProfile';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -821,26 +913,29 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'ButlerReminder') {
       return deserialize<_i7.ButlerReminder>(data['data']);
     }
+    if (dataClassName == 'Chapter') {
+      return deserialize<_i8.Chapter>(data['data']);
+    }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i8.Greeting>(data['data']);
+      return deserialize<_i9.Greeting>(data['data']);
     }
     if (dataClassName == 'Household') {
-      return deserialize<_i9.Household>(data['data']);
+      return deserialize<_i10.Household>(data['data']);
     }
     if (dataClassName == 'HouseholdMember') {
-      return deserialize<_i10.HouseholdMember>(data['data']);
+      return deserialize<_i11.HouseholdMember>(data['data']);
     }
     if (dataClassName == 'Priority') {
-      return deserialize<_i11.Priority>(data['data']);
+      return deserialize<_i12.Priority>(data['data']);
     }
     if (dataClassName == 'ReminderType') {
-      return deserialize<_i12.ReminderType>(data['data']);
+      return deserialize<_i13.ReminderType>(data['data']);
     }
     if (dataClassName == 'SharedRoutine') {
-      return deserialize<_i13.SharedRoutine>(data['data']);
+      return deserialize<_i14.SharedRoutine>(data['data']);
     }
     if (dataClassName == 'UserProfile') {
-      return deserialize<_i14.UserProfile>(data['data']);
+      return deserialize<_i15.UserProfile>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -892,14 +987,16 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i6.Book.t;
       case _i7.ButlerReminder:
         return _i7.ButlerReminder.t;
-      case _i9.Household:
-        return _i9.Household.t;
-      case _i10.HouseholdMember:
-        return _i10.HouseholdMember.t;
-      case _i13.SharedRoutine:
-        return _i13.SharedRoutine.t;
-      case _i14.UserProfile:
-        return _i14.UserProfile.t;
+      case _i8.Chapter:
+        return _i8.Chapter.t;
+      case _i10.Household:
+        return _i10.Household.t;
+      case _i11.HouseholdMember:
+        return _i11.HouseholdMember.t;
+      case _i14.SharedRoutine:
+        return _i14.SharedRoutine.t;
+      case _i15.UserProfile:
+        return _i15.UserProfile.t;
     }
     return null;
   }

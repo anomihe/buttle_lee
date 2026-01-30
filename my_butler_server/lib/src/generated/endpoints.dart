@@ -291,6 +291,37 @@ class Endpoints extends _i1.EndpointDispatch {
                 params['book'],
               ),
         ),
+        'addBookWithChapters': _i1.MethodConnector(
+          name: 'addBookWithChapters',
+          params: {
+            'title': _i1.ParameterDescription(
+              name: 'title',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'author': _i1.ParameterDescription(
+              name: 'author',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'chapterTitles': _i1.ParameterDescription(
+              name: 'chapterTitles',
+              type: _i1.getType<List<String>>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['book'] as _i5.BookEndpoint).addBookWithChapters(
+                    session,
+                    params['title'],
+                    params['author'],
+                    params['chapterTitles'],
+                  ),
+        ),
         'getBooks': _i1.MethodConnector(
           name: 'getBooks',
           params: {},
@@ -300,6 +331,24 @@ class Endpoints extends _i1.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async =>
                   (endpoints['book'] as _i5.BookEndpoint).getBooks(session),
+        ),
+        'getChapters': _i1.MethodConnector(
+          name: 'getChapters',
+          params: {
+            'bookId': _i1.ParameterDescription(
+              name: 'bookId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['book'] as _i5.BookEndpoint).getChapters(
+                session,
+                params['bookId'],
+              ),
         ),
         'finishBook': _i1.MethodConnector(
           name: 'finishBook',
@@ -318,6 +367,92 @@ class Endpoints extends _i1.EndpointDispatch {
                 session,
                 params['id'],
               ),
+        ),
+        'completeBook': _i1.MethodConnector(
+          name: 'completeBook',
+          params: {
+            'bookId': _i1.ParameterDescription(
+              name: 'bookId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'lessonsLearned': _i1.ParameterDescription(
+              name: 'lessonsLearned',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['book'] as _i5.BookEndpoint).completeBook(
+                session,
+                params['bookId'],
+                params['lessonsLearned'],
+              ),
+        ),
+        'updateLessons': _i1.MethodConnector(
+          name: 'updateLessons',
+          params: {
+            'bookId': _i1.ParameterDescription(
+              name: 'bookId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'lessonsLearned': _i1.ParameterDescription(
+              name: 'lessonsLearned',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['book'] as _i5.BookEndpoint).updateLessons(
+                session,
+                params['bookId'],
+                params['lessonsLearned'],
+              ),
+        ),
+        'completeChapter': _i1.MethodConnector(
+          name: 'completeChapter',
+          params: {
+            'chapterId': _i1.ParameterDescription(
+              name: 'chapterId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['book'] as _i5.BookEndpoint).completeChapter(
+                    session,
+                    params['chapterId'],
+                  ),
+        ),
+        'uncompleteChapter': _i1.MethodConnector(
+          name: 'uncompleteChapter',
+          params: {
+            'chapterId': _i1.ParameterDescription(
+              name: 'chapterId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['book'] as _i5.BookEndpoint).uncompleteChapter(
+                    session,
+                    params['chapterId'],
+                  ),
         ),
       },
     );
